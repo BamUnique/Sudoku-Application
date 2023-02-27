@@ -58,7 +58,7 @@ class Window(QMainWindow):
             for col in range(9):
                 inner_row = row // 3
                 inner_col = col //3
-                inner_group_box = self.outer_grid_layout.itemAtPosition(inner_row, inner_colw).widget()
+                inner_group_box = self.outer_grid_layout.itemAtPosition(inner_row, inner_col).widget()
                 
                 cell_row = row % 3
                 cell_col = col % 3

@@ -17,7 +17,6 @@ def remake_grid(grid):
     return new_grid
     
 
-
 if __name__ == '__main__':
     
     puzzle = Sudoku(3).difficulty(0.6)
