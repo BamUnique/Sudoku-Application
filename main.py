@@ -1,12 +1,11 @@
 from sudoku import Sudoku
-import gui
 import newgui
 import math
 import sys
 
 
 def remake_grid(grid):
-    new_grid = [[], [] ,[], [] ,[], [] ,[] ,[] ,[]]
+    new_grid = [ [] * 9 ]
     for j in range(9):
         adjuster_value = (((math.ceil((j+1)/3))-1)*3)
         for i in range(9):

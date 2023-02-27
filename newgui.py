@@ -16,7 +16,7 @@ class Window(QMainWindow):
         
         buttonGrid = QGridLayout()
         buttonGrid.addWidget(self.button, 0, 0)
-        self.setLayout(buttonGrid)
+
         
         
     def makeGrid(self):
@@ -54,6 +54,16 @@ class Window(QMainWindow):
                         self.inner_group_box_layout.addWidget(cell, x, y)
                         
     def checkBoard(self):
+        for row in range(9):
+            for col in range(9):
+                inner_row = row // 3
+                inner_col = col //3
+                inner_group_box = self.outer_grid_layout.itemAtPosition(inner_row, inner_colw).widget()
+                
+                cell_row = row % 3
+                cell_col = col % 3
+                
+                cell_name = f"spinBox_{cell_row}_{cell_col}"
         print("Check Board")
         
     def setCell(self, row: int, col: int, value: int):
