@@ -5,7 +5,7 @@ import sys
 
 
 def remake_grid(grid):
-    new_grid = [ [] * 9 ]
+    new_grid = [[],[],[],[],[],[],[],[],[]]
     for j in range(9):
         adjuster_value = (((math.ceil((j+1)/3))-1)*3)
         for i in range(9):
@@ -20,12 +20,10 @@ def remake_grid(grid):
 if __name__ == '__main__':
     
     puzzle = Sudoku(3).difficulty(0.6)
-    puzzleSolved = puzzle.solve()    
-    puzzleSolved.show()
-    newBoard = remake_grid(puzzle.board)
-
     app = newgui.QApplication(sys.argv)
-    window = newgui.Window()
+    puzzleSolved = puzzle.solve()
+    print(puzzleSolved)
+    window = newgui.Window(puzzleSolved.board)
     for i in range(9):
         for j in range(9):
             window.setCell(i, j, puzzle.board[i][j])

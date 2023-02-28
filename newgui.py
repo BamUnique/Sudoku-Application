@@ -4,12 +4,13 @@ from PyQt6.QtGui import QFont
 import sys
 
 class Window(QMainWindow):
-    def __init__(self):
+    def __init__(self, solvedBoard):
         super().__init__()
         
         self.setWindowTitle('Sudoku Grid')
         self.setGeometry(100, 100, 450, 450)
         self.makeGrid()
+        self.solved_board = solvedBoard
         
         self.button = QPushButton('Check Solve', self)
         self.button.clicked.connect(self.checkBoard)
@@ -54,6 +55,7 @@ class Window(QMainWindow):
                         self.inner_group_box_layout.addWidget(cell, x, y)
                         
     def checkBoard(self):
+        currentGrid = [[],[],[],[],[],[],[],[],[]]
         for row in range(9):
             for col in range(9):
                 inner_row = row // 3
@@ -64,9 +66,20 @@ class Window(QMainWindow):
                 cell_col = col % 3
                 
                 cell_name = f"spinBox_{cell_row}_{cell_col}"
+                cell = inner_group_box.findChild(QSpinBox, cell_name)
+                if cell is not None:
+                    currentGrid[row].append(cell.value())
         print("Check Board")
-        
+        for i in range(9):
+            print(*currentGrid[i])  
+        if currentGrid == self.solved_board:
+            print("SOLVED")
+        else:
+            print("NOT SOLVED")
+        print("Checked Board")
+                
     def setCell(self, row: int, col: int, value: int):
+        
         # calculate the position of the inner group box containing the cell
         inner_row = row // 3
         inner_col = col // 3
@@ -79,10 +92,11 @@ class Window(QMainWindow):
         cell = inner_group_box.findChild(QSpinBox, cell_name)
 
         if cell is not None:
-            cell.setValue(value)
-            if value != 0:
-                cell.setReadOnly(True)
-                cell.setStyleSheet("background-color: #bab7b6; color: black;")
+            if value is not None:
+                cell.setValue(value)
+                if value != 0:
+                    cell.setReadOnly(True)
+                    cell.setStyleSheet("background-color: #bab7b6; color: black;")
 
     
     
