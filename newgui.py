@@ -9,7 +9,6 @@ class Window(QMainWindow):
         
         self.setWindowTitle('Sudoku Grid')
         self.setGeometry(100, 100, 450, 450)
-        self.makeGrid()
         self.solved_board = solvedBoard
         
         self.button = QPushButton('Check Solve', self)
@@ -19,16 +18,19 @@ class Window(QMainWindow):
         self.timer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.timer_label.setFont(QFont('Arial', 20))
         
-        buttonGrid = QGridLayout()
-        buttonGrid.addWidget(self.button, 0, 0)
-        buttonGrid.addWidget(self.timer_label, 0, 1)
+        self.buttonGrid = QGridLayout()
+        self.buttonGrid.addWidget(self.button, 0, 0)
+        self.buttonGrid.addWidget(self.timer_label, 0, 1)
+        self.buttonGrid.setSpacing(10)
         
+        #Creates times and runs the function to update every 0.1 seconds as if i run it every second sometimes the timer messes up the time
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(100)
         self.start_time = None
         
-
+        self.makeGrid()
+    # Runs this function every time that the timer see's that 0.1 seconds has passes
     def update(self):
         if self.start_time is None:
             self.start_time = QDateTime.currentDateTime()
@@ -43,13 +45,16 @@ class Window(QMainWindow):
         
     def makeGrid(self):
         central_widget = QGroupBox(self)
-        central_widget.setFixedSize(450, 450)
+        # central_widget.setFixedSize(450, 450)
         self.setCentralWidget(central_widget)
         
         self.cell_size = (45, 45)
         
         self.outer_grid_layout = QGridLayout()
         self.outer_grid_layout.setSpacing(0)
+        self.outer_grid_layout.addLayout(self.buttonGrid, 3, 3, alignment=Qt.AlignmentFlag.AlignBottom)
+        
+
         central_widget.setLayout(self.outer_grid_layout)
         
         for i in range(3):
@@ -95,6 +100,7 @@ class Window(QMainWindow):
             print(*currentGrid[i])  
         if currentGrid == self.solved_board:
             print("SOLVED")
+            self.timer.stop()
         else:
             print("NOT SOLVED")
         print("Checked Board")

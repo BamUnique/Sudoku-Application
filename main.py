@@ -16,18 +16,28 @@ def remake_grid(grid):
             new_grid[listValue].append(grid[j][i])
     return new_grid
     
+def startPuzzle(difficulty: int):
+    
+    for i in range(9):
+        for j in range(9):
+            window.setCell(i, j, puzzle.board[i][j])
+            
+def chooseDifficulty():
+    chosenDifficulty = int(input("Choose a difficulty from 1-4:\n"))
+    chosenDifficulty -= 1
+    difficulty_list = [0.5, 0.6, 0.7, 0.8]
+    return difficulty_list[chosenDifficulty]
 
 if __name__ == '__main__':
     
-    puzzle = Sudoku(3).difficulty(0.6)
+    chosen_difficulty = chooseDifficulty()
+    
+    puzzle = Sudoku(3).difficulty(chosen_difficulty)
     app = newgui.QApplication(sys.argv)
     puzzleSolved = puzzle.solve()
     print(puzzleSolved)
     window = newgui.Window(puzzleSolved.board)
-    for i in range(9):
-        for j in range(9):
-            window.setCell(i, j, puzzle.board[i][j])
-    
+    startPuzzle(1)
 
     window.show()
     
