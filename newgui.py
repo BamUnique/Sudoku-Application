@@ -1,5 +1,5 @@
-from PyQt6.QtWidgets import QGroupBox, QMainWindow, QApplication, QGridLayout, QSpinBox, QSizePolicy, QPushButton
-from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QGroupBox, QMainWindow, QApplication, QGridLayout, QSpinBox, QSizePolicy, QPushButton, QLabel
+from PyQt6.QtCore import Qt, QTimer, QDateTime
 from PyQt6.QtGui import QFont
 import sys
 
@@ -15,9 +15,30 @@ class Window(QMainWindow):
         self.button = QPushButton('Check Solve', self)
         self.button.clicked.connect(self.checkBoard)
         
+        self.timer_label = QLabel('00:00', self)
+        self.timer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.timer_label.setFont(QFont('Arial', 20))
+        
         buttonGrid = QGridLayout()
         buttonGrid.addWidget(self.button, 0, 0)
+        buttonGrid.addWidget(self.timer_label, 0, 1)
+        
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.update)
+        self.timer.start(100)
+        self.start_time = None
+        
 
+    def update(self):
+        if self.start_time is None:
+            self.start_time = QDateTime.currentDateTime()
+            
+        elapsed = self.start_time.secsTo(QDateTime.currentDateTime())
+        minutes = elapsed // 60
+        seconds = elapsed % 60
+        
+        time_str = f"{minutes:02}:{seconds:02}"
+        self.timer_label.setText(time_str)
         
         
     def makeGrid(self):
