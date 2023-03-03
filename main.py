@@ -2,25 +2,20 @@ from sudoku import Sudoku
 import newgui
 import math
 import sys
+import menu
 
 
-def remake_grid(grid):
-    new_grid = [[],[],[],[],[],[],[],[],[]]
-    for j in range(9):
-        adjuster_value = (((math.ceil((j+1)/3))-1)*3)
-        for i in range(9):
-            checker = i+1
-            listValue = (math.ceil(checker/3)-1 + adjuster_value)
-            if grid[j][i] == None:
-                grid[j][i] = 0
-            new_grid[listValue].append(grid[j][i])
-    return new_grid
-    
-def startPuzzle(difficulty: int):
-    
-    for i in range(9):
-        for j in range(9):
-            window.setCell(i, j, puzzle.board[i][j])
+# def remake_grid(grid):
+#     new_grid = [[],[],[],[],[],[],[],[],[]]
+#     for j in range(9):
+#         adjuster_value = (((math.ceil((j+1)/3))-1)*3)
+#         for i in range(9):
+#             checker = i+1
+#             listValue = (math.ceil(checker/3)-1 + adjuster_value)
+#             if grid[j][i] == None:
+#                 grid[j][i] = 0
+#             new_grid[listValue].append(grid[j][i])
+#     return new_grid
             
 def chooseDifficulty():
     chosenDifficulty = int(input("Choose a difficulty from 1-4:\n"))
@@ -30,15 +25,14 @@ def chooseDifficulty():
 
 if __name__ == '__main__':
     
+    # app = menu.QApplication(sys.argv)
+    # main_menu = menu.SelectionMenu()
+    # main_menu.show()
+    
     chosen_difficulty = chooseDifficulty()
     
-    puzzle = Sudoku(3).difficulty(chosen_difficulty)
     app = newgui.QApplication(sys.argv)
-    puzzleSolved = puzzle.solve()
-    print(puzzleSolved)
-    window = newgui.Window(puzzleSolved.board)
-    startPuzzle(1)
-
+    window = newgui.Window(chosen_difficulty)
     window.show()
     
     sys.exit(app.exec())

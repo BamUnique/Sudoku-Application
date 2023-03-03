@@ -2,14 +2,20 @@ from PyQt6.QtWidgets import QGroupBox, QMainWindow, QApplication, QGridLayout, Q
 from PyQt6.QtCore import Qt, QTimer, QDateTime
 from PyQt6.QtGui import QFont
 import sys
+from sudoku import Sudoku
 
 class Window(QMainWindow):
-    def __init__(self, solvedBoard):
+    def __init__(self, given_difficulty):
         super().__init__()
         
         self.setWindowTitle('Sudoku Grid')
         self.setGeometry(100, 100, 450, 450)
-        self.solved_board = solvedBoard
+        
+        puzzle = self.getBoard(given_difficulty)
+        
+        self.unsolved_board = puzzle.board
+        
+        self.difficulty = given_difficulty
         
         self.button = QPushButton('Check Solve', self)
         self.button.clicked.connect(self.checkBoard)
@@ -30,6 +36,7 @@ class Window(QMainWindow):
         self.start_time = None
         
         self.makeGrid()
+        self.setBoard()
     # Runs this function every time that the timer see's that 0.1 seconds has passes
     def update(self):
         if self.start_time is None:
@@ -41,7 +48,6 @@ class Window(QMainWindow):
         
         time_str = f"{minutes:02}:{seconds:02}"
         self.timer_label.setText(time_str)
-        
         
     def makeGrid(self):
         central_widget = QGroupBox(self)
@@ -125,11 +131,22 @@ class Window(QMainWindow):
                     cell.setReadOnly(True)
                     cell.setStyleSheet("background-color: #bab7b6; color: black;")
 
+    def getBoard(self, difficulty):
+        puzzle = Sudoku(3).difficulty(difficulty)
+        
+        return puzzle
+    
+    def setBoard(self):
+    
+        for i in range(9):
+            for j in range(9):
+                self.setCell(i, j, self.unsolved_board[i][j])
+    
     
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    sudoku = Window()
+    sudoku = Window(0.6)
     sudoku.setCell(3, 1, 5)
     
 
