@@ -12,8 +12,10 @@ class Window(QMainWindow):
         self.setGeometry(100, 100, 450, 450)
         
         puzzle = self.getBoard(given_difficulty)
+        solved_puzzle = puzzle.solve()
         
         self.unsolved_board = puzzle.board
+        self.solved_board = solved_puzzle.board
         
         self.difficulty = given_difficulty
         

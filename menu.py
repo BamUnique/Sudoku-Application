@@ -34,7 +34,7 @@ class SelectionMenu(QMainWindow):
         
     def playButton(self):
         print("Play")
-        self.changePage()
+        self.changePage(game_page)
         
     def accountButton(self):
         print("Account")
@@ -44,7 +44,6 @@ class SelectionMenu(QMainWindow):
       
     def changePage(self, pageToChangeTo):
         currentPage.setCurrentWidget(pageToChangeTo)
-        
       
 class TestPage(QMainWindow):
     def __init__(self):
@@ -75,6 +74,9 @@ if __name__ == '__main__':
     
     app = QApplication(sys.argv)
     currentPage = QStackedWidget()
+    
+    game_page = newgui.Window(0.6)
+    currentPage.addWidget(game_page)
     
     main_menu = SelectionMenu()
     currentPage.addWidget(main_menu)
