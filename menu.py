@@ -1,9 +1,10 @@
-from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout, QGroupBox, QStackedWidget
-from PyQt6.QtCore import Qt, QCoreApplication
-from PyQt6.QtGui import QFont
-import newgui
-import test_file
 import sys
+from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout, QGroupBox, QStackedWidget
+from PyQt6.QtCore import Qt, QCoreApplication, QRect
+from PyQt6.QtGui import QFont
+
+import newgui
+import loginfeature
 
 
 class SelectionMenu(QMainWindow):
@@ -11,24 +12,35 @@ class SelectionMenu(QMainWindow):
         super().__init__()
         
         self.setWindowTitle('Sudoku Application')
-        self.setGeometry(100, 100, 450, 450)
+        self.setGeometry(0, 0, 450, 450)
+
         
         self.central_layout = QGroupBox(self)
         self.setCentralWidget(self.central_layout)
         
+        button_width = 200
+        button_height = 40
+        button_spot = -10
+        
+        self.x_pos = int((618 - button_width) / 2)
+        self.y_pos = int((self.frameGeometry().height() - button_height) / 2)
+        
         self.play_button = QPushButton('Play', self)
         self.play_button.clicked.connect(self.playButton)
+        self.play_button.setGeometry(QRect(self.x_pos, self.y_pos-(button_spot), button_width, button_height))
         
         self.account_button = QPushButton('Account', self)
         self.account_button.clicked.connect(self.accountButton)
+        self.account_button.setGeometry(QRect(self.x_pos, self.y_pos-(button_spot-35), button_width, button_height))
         
         self.quit_button = QPushButton('Quit', self)
         self.quit_button.clicked.connect(QCoreApplication.instance().quit)
+        self.quit_button.setGeometry(QRect(self.x_pos, self.y_pos-(button_spot-70), button_width, button_height))
         
         self.button_grid = QGridLayout()
-        self.button_grid.addWidget(self.play_button, 0, 1, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.button_grid.addWidget(self.account_button, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.button_grid.addWidget(self.quit_button, 2, 1, alignment=Qt.AlignmentFlag.AlignCenter)
+        # self.button_grid.addWidget(self.play_button, 0, 1, alignment=Qt.AlignmentFlag.AlignCenter)
+        # self.button_grid.addWidget(self.account_button, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter)
+        # self.button_grid.addWidget(self.quit_button, 2, 1, alignment=Qt.AlignmentFlag.AlignCenter)
         
         self.central_layout.setLayout(self.button_grid)
         
@@ -39,7 +51,7 @@ class SelectionMenu(QMainWindow):
     def accountButton(self):
         print("Account")
         print("Switching Page")
-        self.changePage(test_page)   
+        self.changePage(account_page)   
       
       
     def changePage(self, pageToChangeTo):
@@ -64,13 +76,14 @@ class TestPage(QMainWindow):
         self.changePage(main_menu)    
         
     def across_button(self):
-        self.changePage(testing_page)
+        self.changePage(account_page)
     
     def changePage(self, pageToChangeTo):
         currentPage.setCurrentWidget(pageToChangeTo)
           
         
 if __name__ == '__main__':
+    
     
     app = QApplication(sys.argv)
     currentPage = QStackedWidget()
@@ -84,8 +97,8 @@ if __name__ == '__main__':
     test_page = TestPage()
     currentPage.addWidget(test_page)
     
-    testing_page = test_file.AccountLogin(currentPage, main_menu)
-    currentPage.addWidget(testing_page)
+    account_page = loginfeature.LoginScreen(currentPage, main_menu)
+    currentPage.addWidget(account_page)
     
     currentPage.setCurrentWidget(main_menu)
     currentPage.show()
