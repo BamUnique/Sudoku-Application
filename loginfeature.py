@@ -1,5 +1,6 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QLineEdit, QLabel, QCheckBox
 import email_validator
+import json
 
 
 class LoginScreen(QMainWindow):
@@ -39,6 +40,7 @@ class LoginScreen(QMainWindow):
         
         self.login_button = QPushButton("Login", self)
         self.login_button.setGeometry(self.x_position+(214), self.y_position+70, 100, 30)
+        self.login_button.clicked.connect(self.matchPassword)
         
     def checkIfShowPassword(self):
         if self.show_password_option.isChecked():
@@ -48,6 +50,31 @@ class LoginScreen(QMainWindow):
     
     def go_back(self):
         self.currentPage.setCurrentWidget(self.menu)
+        
+
+    def matchPassword(self):
+        self.return_error = False
+        
+        f = open('test_account.json')
+        data = json.load(f)
+        
+        email = self.email_box.text()
+        
+        emails = [account['email'] for account in data['accounts']]
+        try:
+            index = emails.index(email)
+            print(index)
+            if self.password_box.text() == data['accounts'][index]['password']:
+                print("True")
+            else: 
+                self.return_error = True
+        except ValueError:
+            self.return_error = True
+            
+        if not self.return_error:
+            self.loaded_account = (data['accounts'][index])
+            print(self.loaded_account)
+        
         
 class CreateNewAccount(QMainWindow):
     def __init__(self, currentPage):
