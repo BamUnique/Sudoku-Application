@@ -5,6 +5,7 @@ from PyQt6.QtGui import QFont
 
 import newgui
 import loginfeature
+import difficulty_selection
 
 
 class SelectionMenu(QMainWindow):
@@ -13,7 +14,6 @@ class SelectionMenu(QMainWindow):
         
         self.setWindowTitle('Sudoku Application')
         self.setGeometry(0, 0, 450, 450)
-
         
         self.central_layout = QGroupBox(self)
         self.setCentralWidget(self.central_layout)
@@ -47,6 +47,7 @@ class SelectionMenu(QMainWindow):
     def playButton(self):
         print("Play")
         self.changePage(game_page)
+        # self.changePage(difficulty_page)
         
     def accountButton(self):
         print("Account")
@@ -88,6 +89,9 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     currentPage = QStackedWidget()
     
+    difficulty_page = difficulty_selection.DifficultySelection()
+    currentPage.addWidget(difficulty_page)
+    
     game_page = newgui.Window(0.6)
     currentPage.addWidget(game_page)
     
@@ -97,7 +101,10 @@ if __name__ == '__main__':
     test_page = TestPage()
     currentPage.addWidget(test_page)
     
-    account_page = loginfeature.LoginScreen(currentPage, main_menu)
+    new_account_page = loginfeature.CreateNewAccount(currentPage, main_menu)
+    currentPage.addWidget(new_account_page)
+    
+    account_page = loginfeature.LoginScreen(currentPage, main_menu, new_account_page)
     currentPage.addWidget(account_page)
     
     currentPage.setCurrentWidget(main_menu)
