@@ -2,16 +2,25 @@ from PyQt6.QtWidgets import QGroupBox, QMainWindow, QApplication, QGridLayout, Q
 from PyQt6.QtCore import Qt, QTimer, QDateTime
 from PyQt6.QtGui import QFont
 import sys
+from random import randrange
 from sudoku import Sudoku
+import logging
 
 class Window(QMainWindow):
-    def __init__(self, given_difficulty):
+    
+    difficulty_list = {"Easy": 0.5, "Medium": 0.6, "Hard": 0.7, "Expert": 0.8}
+        
+    def __init__(self, given_difficulty, loaded_account = None):
         super().__init__()
+        
+        if loaded_account is not None:
+            self.account_data = loaded_account
+            self.logged_in = True
         
         self.setWindowTitle('Sudoku Grid')
         self.setGeometry(100, 100, 450, 450)
         
-        puzzle = self.getBoard(given_difficulty)
+        puzzle = self.getBoard(given_difficulty, 100)
         solved_puzzle = puzzle.solve()
         
         self.unsolved_board = puzzle.board
@@ -39,14 +48,89 @@ class Window(QMainWindow):
         
         self.makeGrid()
         self.setBoard()
+        
+        self.reset_button = QPushButton("Reset Board", self)
+        self.reset_button.move(450, 50)
+        self.reset_button.clicked.connect(self.reset_board)
+        
+        self.difficulty_label = QLabel("NONE", self)
+        self.difficulty_label.setFont(QFont('Arial', 20))
+        self.difficulty_label.move(int(550-(self.difficulty_label.width())), 20)
+        self.difficulty_label.adjustSize()
+        
+        self.personal_best_time = QLabel("None", self)
+        self.personal_best_time.setFont(QFont('Arial', 18))
+        self.personal_best_time.move(550, 200)
+        
+        self.testing_button = QPushButton("Testing", self)
+        self.testing_button.move(500, 100)
+        self.testing_button.clicked.connect(lambda: self.setup_board("Easy"))
+        
+    def setup_board(self, difficulty):
+        difficulty_num = self.difficulty_list[difficulty]
+        seed = randrange(sys.maxsize)
+        
+        self.set_difficulty_label(difficulty)
+        board = self.getBoard(difficulty_num, seed)
+        self.applyBoard(board.board)
+
+    
+    def set_difficulty_label(self, difficulty_text):
+        self.difficulty_label.setText(difficulty_text)
+                
+    def getBoard(self, difficulty, seed):
+        puzzle = Sudoku(3, seed=seed).difficulty(difficulty)
+        return puzzle
+    
+    def applyBoard(self, board):
+        for row_index, current_row in enumerate(board):
+            for col_index, value in enumerate(current_row):
+                
+                if value is not None:
+                    cell_container_row = row_index // 3
+                    cell_container_col = col_index // 3
+                    inner_group_box = self.outer_grid_layout.itemAtPosition(cell_container_row, cell_container_col).widget()
+                    
+                    cell_row = row_index % 3
+                    cell_col = col_index % 3
+                    
+                    cell_name = f"spinBox_{cell_row}_{cell_col}"
+                    cell = inner_group_box.findChild(QSpinBox, cell_name)
+                    if cell is not None:
+                        cell.setValue(value)
+                        cell.setReadOnly(True)
+                        cell.setStyleSheet("background-color: #bab7b6; color: black;")
+                        
+    
+    def reset_board(self):
+        for row in range(9):
+            for col in range(9):
+                inner_row = row // 3
+                inner_col = col // 3
+                inner_group_box = self.outer_grid_layout.itemAtPosition(inner_row, inner_col).widget()
+        
+                cell_row = row % 3
+                cell_col = col % 3
+
+                cell_name = f"spinBox_{cell_row}_{cell_col}"
+                cell = inner_group_box.findChild(QSpinBox, cell_name)
+
+                if cell is not None:
+                    cell.setReadOnly(False)
+                    cell.setStyleSheet("background-color: white; color: black;")
+                    cell.setValue(0)
+        self.timer_label.setText("00:00")
+        self.timer.stop() 
+
+        
     # Runs this function every time that the timer see's that 0.1 seconds has passes
     def update(self):
         if self.start_time is None:
             self.start_time = QDateTime.currentDateTime()
             
-        elapsed = self.start_time.secsTo(QDateTime.currentDateTime())
-        minutes = elapsed // 60
-        seconds = elapsed % 60
+        self.elapsed = self.start_time.secsTo(QDateTime.currentDateTime())
+        minutes = self.elapsed // 60
+        seconds = self.elapsed % 60
         
         time_str = f"{minutes:02}:{seconds:02}"
         self.timer_label.setText(time_str)
@@ -103,15 +187,13 @@ class Window(QMainWindow):
                 cell = inner_group_box.findChild(QSpinBox, cell_name)
                 if cell is not None:
                     currentGrid[row].append(cell.value())
-        print("Check Board")
         for i in range(9):
             print(*currentGrid[i])  
         if currentGrid == self.solved_board:
-            print("SOLVED")
+            logging.info("Puzzle is solved")
             self.timer.stop()
         else:
-            print("NOT SOLVED")
-        print("Checked Board")
+            logging.info("Puzzle is not solved")
                 
     def setCell(self, row: int, col: int, value: int):
         
@@ -133,13 +215,8 @@ class Window(QMainWindow):
                     cell.setReadOnly(True)
                     cell.setStyleSheet("background-color: #bab7b6; color: black;")
 
-    def getBoard(self, difficulty):
-        puzzle = Sudoku(3).difficulty(difficulty)
-        
-        return puzzle
-    
+  
     def setBoard(self):
-    
         for i in range(9):
             for j in range(9):
                 self.setCell(i, j, self.unsolved_board[i][j])
@@ -147,6 +224,11 @@ class Window(QMainWindow):
     
     
 if __name__ == '__main__':
+    
+    level = logging.DEBUG
+    fmt = '[%(levelname)s] %(asctime)s - %(message)s'
+    logging.basicConfig(level=level, format=fmt)
+    
     app = QApplication(sys.argv)
     sudoku = Window(0.6)
     sudoku.setCell(3, 1, 5)

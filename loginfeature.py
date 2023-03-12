@@ -1,6 +1,7 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QLineEdit, QLabel, QCheckBox
 import email_validator
 import json
+import menu
 
 
 class LoginScreen(QMainWindow):
@@ -55,7 +56,7 @@ class LoginScreen(QMainWindow):
         self.error_message.setStyleSheet("color: #fa143e;")
         
     def createAccountClicked(self, event):
-        print(self.currentPage.setCurrentWidget(self.newAccountPage))
+        self.currentPage.setCurrentWidget(self.newAccountPage)
     
     def checkIfShowPassword(self):
         if self.show_password_option.isChecked():
@@ -78,10 +79,7 @@ class LoginScreen(QMainWindow):
         emails = [account['email'] for account in data['accounts']]
         try:
             index = emails.index(email)
-            print(index)
-            if self.password_box.text() == data['accounts'][index]['password']:
-                print("True")
-            else: 
+            if self.password_box.text() != data['accounts'][index]['password']:
                 self.return_error = True
                 self.error_text = "Incorrect email or password"
         except ValueError:
@@ -90,11 +88,17 @@ class LoginScreen(QMainWindow):
             
         if not self.return_error:
             self.loaded_account = (data['accounts'][index])
-            print(self.loaded_account)
+            # print(self.loaded_account)
+            self.currentPage.setCurrentWidget(self.menu)
+
         else:
             self.error_message.setText(self.error_text)
             self.error_message.adjustSize()
-        
+            
+    def getAccountInformation(self):
+        pass
+            
+
 class CreateNewAccount(QMainWindow):
     def __init__(self, currentPage, menu):
         super().__init__()
@@ -201,7 +205,7 @@ class CreateNewAccount(QMainWindow):
             with open('test_account.json', 'w') as f:
                 json.dump(data, f, indent=4)
                 
-            
+            print("Here")
             self.loadAccountData()
     
         if self.return_error:
@@ -219,8 +223,8 @@ class CreateNewAccount(QMainWindow):
         
         try:
             index = usernames.index(username)
-            print(index)
             print(data['accounts'][index])
+            self.account_information = data['accounts'][index]
         except ValueError:
             pass
             

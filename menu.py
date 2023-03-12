@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout, QGroupBox, QStackedWidget
+from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout, QGroupBox, QStackedWidget, QLabel
 from PyQt6.QtCore import Qt, QCoreApplication, QRect
 from PyQt6.QtGui import QFont
 
@@ -11,6 +11,8 @@ import difficulty_selection
 class SelectionMenu(QMainWindow):
     def __init__(self):
         super().__init__()
+        self.loggedIn = None
+
         
         self.setWindowTitle('Sudoku Application')
         self.setGeometry(0, 0, 450, 450)
@@ -21,6 +23,8 @@ class SelectionMenu(QMainWindow):
         button_width = 200
         button_height = 40
         button_spot = -10
+        
+        self.username = "Guest"
         
         self.x_pos = int((618 - button_width) / 2)
         self.y_pos = int((self.frameGeometry().height() - button_height) / 2)
@@ -42,22 +46,35 @@ class SelectionMenu(QMainWindow):
         # self.button_grid.addWidget(self.account_button, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter)
         # self.button_grid.addWidget(self.quit_button, 2, 1, alignment=Qt.AlignmentFlag.AlignCenter)
         
+        self.username_text = QLabel(self.username, self)
+        self.username_text.adjustSize()
+        self.username_text.move((618-self.username_text.width())-10, 10)
+        
+        
         self.central_layout.setLayout(self.button_grid)
         
+        
+        
     def playButton(self):
-        print("Play")
+        # print(self.account_information)
         self.changePage(game_page)
         # self.changePage(difficulty_page)
         
     def accountButton(self):
-        print("Account")
-        print("Switching Page")
-        self.changePage(account_page)   
-      
+        self.changePage(account_page)
+        
+    def updateInformation(self):
+        print("Updating Information")
+        self.account_information = loginfeature.LoginScreen.getAccountInformation()
+        print(self.account_information)
+        self.username = self.account_information['username']
+    
+        self.username_text.setText(self.username)
       
     def changePage(self, pageToChangeTo):
         currentPage.setCurrentWidget(pageToChangeTo)
       
+        
 class TestPage(QMainWindow):
     def __init__(self):
         super().__init__()
