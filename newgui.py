@@ -13,6 +13,8 @@ class Window(QMainWindow):
     def __init__(self, given_difficulty, loaded_account = None):
         super().__init__()
         
+        self.hint_mode = False
+        
         if loaded_account is not None:
             self.account_data = loaded_account
             self.logged_in = True
@@ -66,60 +68,85 @@ class Window(QMainWindow):
         self.testing_button.move(500, 100)
         self.testing_button.clicked.connect(lambda: self.setup_board("Easy"))
         
+        self.hint_button = QPushButton("Hint", self)
+        self.hint_button.move(500, 140)
+        self.hint_button.clicked.connect(lambda :setattr(self, 'hint_mode', True))
+        
     def setup_board(self, difficulty):
+        self.solved_board = None
         difficulty_num = self.difficulty_list[difficulty]
         seed = randrange(sys.maxsize)
         
         self.set_difficulty_label(difficulty)
         board = self.getBoard(difficulty_num, seed)
         self.applyBoard(board.board)
+        self.solved_board = board.solve().board
+        
+        self.timer.start()
 
     
     def set_difficulty_label(self, difficulty_text):
         self.difficulty_label.setText(difficulty_text)
+        
                 
     def getBoard(self, difficulty, seed):
         puzzle = Sudoku(3, seed=seed).difficulty(difficulty)
         return puzzle
+    
     
     def applyBoard(self, board):
         for row_index, current_row in enumerate(board):
             for col_index, value in enumerate(current_row):
                 
                 if value is not None:
-                    cell_container_row = row_index // 3
-                    cell_container_col = col_index // 3
-                    inner_group_box = self.outer_grid_layout.itemAtPosition(cell_container_row, cell_container_col).widget()
+                    cell = self.returnCell(col_index, row_index)
                     
-                    cell_row = row_index % 3
-                    cell_col = col_index % 3
-                    
-                    cell_name = f"spinBox_{cell_row}_{cell_col}"
-                    cell = inner_group_box.findChild(QSpinBox, cell_name)
                     if cell is not None:
                         cell.setValue(value)
                         cell.setReadOnly(True)
                         cell.setStyleSheet("background-color: #bab7b6; color: black;")
                         
     
+    def hint(self):
+        pass
+    
+    def getCellName(self):
+        pass
+        
+    def returnCell(self, col : int, row : int) -> QSpinBox:
+        """
+        Returns the cell of position row, col in the sudoku grid.
+
+        Args:
+
+        Returns:
+            QSpinBox: cell of position row, col
+        """
+        
+        inner_row = row // 3
+        inner_col = col // 3
+        inner_group_box = self.outer_grid_layout.itemAtPosition(inner_row, inner_col).widget()
+        
+        cell_row = row % 3
+        cell_col = col % 3
+        
+        cell_name = f"spinBox_{cell_row}_{cell_col}"
+        cell = inner_group_box.findChild(QSpinBox, cell_name)
+        
+        return cell
+    
+    
     def reset_board(self):
         for row in range(9):
             for col in range(9):
-                inner_row = row // 3
-                inner_col = col // 3
-                inner_group_box = self.outer_grid_layout.itemAtPosition(inner_row, inner_col).widget()
-        
-                cell_row = row % 3
-                cell_col = col % 3
-
-                cell_name = f"spinBox_{cell_row}_{cell_col}"
-                cell = inner_group_box.findChild(QSpinBox, cell_name)
-
+                cell = self.returnCell(col, row)
+                
                 if cell is not None:
                     cell.setReadOnly(False)
                     cell.setStyleSheet("background-color: white; color: black;")
                     cell.setValue(0)
         self.timer_label.setText("00:00")
+        self.start_time = None
         self.timer.stop() 
 
         
@@ -157,6 +184,7 @@ class Window(QMainWindow):
                 self.inner_group_box_layout.setSpacing(0)
                 self.inner_group_box_layout.setContentsMargins(0, 0, 0, 0)
                 inner_group_box.setLayout(self.inner_group_box_layout)
+                inner_group_box.setObjectName(f"cellContainer_{i}_{j}")
                 self.outer_grid_layout.addWidget(inner_group_box, i, j, alignment=Qt.AlignmentFlag.AlignCenter)
                 
                 for x in range(3):
@@ -169,22 +197,37 @@ class Window(QMainWindow):
                         cell.setFont(QFont('Arial', 20))
                         cell.setSpecialValueText(" ")
                         cell.setMaximum(9)
+                        # cell.valueChanged.connect(self.setBoard)
                         cell.setObjectName(f"spinBox_{x}_{y}")
                         self.inner_group_box_layout.addWidget(cell, x, y)
+                        cell.editingFinished.connect(self.hint)
                         
+                        
+    def hint(self):
+        if self.hint_mode:
+            sender = self.sender()
+            cell_name = sender.objectName()
+            
+            cell_parent = sender.parent().objectName()
+            x_factor = int(cell_parent[14:15])
+            y_factor = int(cell_parent[16:17])
+            
+            cell_row, cell_col = map(int, cell_name.split("_")[1:])
+            cell_row , cell_col = cell_row + (3*x_factor), cell_col + (3*y_factor)
+            
+            cell = self.returnCell(cell_col, cell_row)
+
+            cell.setValue(self.solved_board[cell_row][cell_col])
+            cell.setStyleSheet("background-color: white; color: #1962ff;")
+            cell.setReadOnly(True)
+            
+            self.hint_mode = False
+    
     def checkBoard(self):
         currentGrid = [[],[],[],[],[],[],[],[],[]]
         for row in range(9):
             for col in range(9):
-                inner_row = row // 3
-                inner_col = col //3
-                inner_group_box = self.outer_grid_layout.itemAtPosition(inner_row, inner_col).widget()
-                
-                cell_row = row % 3
-                cell_col = col % 3
-                
-                cell_name = f"spinBox_{cell_row}_{cell_col}"
-                cell = inner_group_box.findChild(QSpinBox, cell_name)
+                cell = self.returnCell(col, row)
                 if cell is not None:
                     currentGrid[row].append(cell.value())
         for i in range(9):
