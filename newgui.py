@@ -14,6 +14,8 @@ class Window(QMainWindow):
         super().__init__()
         
         self.hint_mode = False
+        self.testing_val = False
+        self.error_cell_list = {}
         
         if loaded_account is not None:
             self.account_data = loaded_account
@@ -66,11 +68,15 @@ class Window(QMainWindow):
         
         self.testing_button = QPushButton("Testing", self)
         self.testing_button.move(500, 100)
-        self.testing_button.clicked.connect(lambda: self.setup_board("Easy"))
+        self.testing_button.clicked.connect(lambda: self.setup_board("Expert"))
         
         self.hint_button = QPushButton("Hint", self)
         self.hint_button.move(500, 140)
         self.hint_button.clicked.connect(lambda :setattr(self, 'hint_mode', True))
+        
+        self.testing_button2 = QPushButton("Conflicting Values", self)
+        self.testing_button2.move(500, 160)
+        self.testing_button2.clicked.connect(lambda :setattr(self, 'testing_val', True))
         
     def setup_board(self, difficulty):
         self.solved_board = None
@@ -106,12 +112,6 @@ class Window(QMainWindow):
                         cell.setReadOnly(True)
                         cell.setStyleSheet("background-color: #bab7b6; color: black;")
                         
-    
-    def hint(self):
-        pass
-    
-    def getCellName(self):
-        pass
         
     def returnCell(self, col : int, row : int) -> QSpinBox:
         """
@@ -162,6 +162,144 @@ class Window(QMainWindow):
         time_str = f"{minutes:02}:{seconds:02}"
         self.timer_label.setText(time_str)
         
+    
+    def splitStyleSheet(self, style_sheet : str) -> str:
+        """
+        Returns the style_sheet but split into background_color and color variables.
+
+        Args:
+            style_sheet (str): Style sheet of an object given in text form.
+
+        Returns:
+            background_color (str): background color of the style sheet.
+            color (str): color value of the style sheet.
+        """
+        style_sheet = style_sheet[18:]
+        index = str.find(style_sheet, " color: ")
+        color = style_sheet[index+8:len(style_sheet)-1]
+
+        return style_sheet[:index-1], color
+        
+    
+    def adjustConflicting(self, cell : QSpinBox, style_sheet : str, conflicting : bool):
+        """
+        Determines whether the cell needs to have the value color changed to red or black.
+
+        Args:
+            cell (QSpinBox): cell that needs to have its color changed.
+            style_sheet (str): cells style_sheet
+            conflicting (bool): True if the cell is a conflicting value, False if not.
+        """
+        
+        background_color, color = self.splitStyleSheet(style_sheet)
+        if color != "#1962ff":
+            if conflicting:
+                cell.setStyleSheet(f"background-color: {background_color}; color: red;")
+            else:
+                cell.setStyleSheet(f"background-color: {background_color}; color: black;")
+            
+    
+    
+    def checkCellContainer(self, cell : QSpinBox, error_cell_siblings : list):
+        """
+        Returns the value of all the cells in the parent of the cell given as a list.
+
+        Args:
+            cell (QSpinBox): cell being checked with its siblings.
+            error_cell_sibling (list): List that will contain the cell siblings.
+
+        Returns:
+            valueList (list): list of all values.
+            cell.parent().objectName(): name of the parent container.
+        """
+        
+        x, y = map(int, cell.parent().objectName().split("_")[1:])
+        for row in range(3):
+            for col in range(3):
+                cell_sibling = self.returnCell((col+(3*y)), (row+(3*x)))
+                if cell_sibling != cell:
+                    if cell_sibling.value() == cell.value():
+                        self.adjustConflicting(cell, cell.styleSheet(), True)
+                        self.adjustConflicting(cell_sibling, cell_sibling.styleSheet(), True)
+                        if cell_sibling not in error_cell_siblings:
+                            error_cell_siblings.append(cell_sibling)
+                        
+        return error_cell_siblings
+                
+        
+        
+    def checkConflicting(self):
+        self.conflicted = False
+        error_cell_siblings = []
+        if self.testing_val:
+            sender = self.sender()
+            cell_name = sender.objectName()
+            cell_parent = sender.parent().objectName() 
+            
+            x_factor, y_factor = map(int, cell_parent.split("_")[1:])
+            cell_row, cell_col = map(int, cell_name.split("_")[1:])
+            cell_row, cell_col = cell_row+(3*x_factor), cell_col+(3*y_factor)
+            
+            cell = self.returnCell(cell_col, cell_row)
+            
+            if cell.objectName() in self.error_cell_list:
+                for cell_obj in self.error_cell_list[cell.objectName()]:
+                    self.adjustConflicting(cell_obj, cell_obj.styleSheet(), False)
+                    
+            check_value = cell.value()
+            
+            
+            for row in range(9):
+                if row != cell_row:
+                    cell_sibling = self.returnCell(cell_col, row)
+                    value = cell_sibling.value()
+                    if check_value == value:
+                        self.adjustConflicting(cell, cell.styleSheet(), True)
+                        self.adjustConflicting(cell_sibling, cell_sibling.styleSheet(), True)
+                        self.conflicted = True
+                        error_cell_siblings.append(cell_sibling)
+            
+            for col in range(9):
+                if col != cell_col:
+                    cell_sibling = self.returnCell(col, cell_row)
+                    value = cell_sibling.value()
+                    if check_value == value:
+                        self.adjustConflicting(cell, cell.styleSheet(), True)
+                        self.adjustConflicting(cell_sibling, cell_sibling.styleSheet(), True)
+                        self.conflicted = True
+                        error_cell_siblings.append(cell_sibling)
+                        
+            error_cell_siblings = self.checkCellContainer(cell, error_cell_siblings)
+                
+            if self.conflicted:
+                self.error_cell_list[f"{cell.objectName()}"] = error_cell_siblings
+            else:
+                self.adjustConflicting(cell, cell.styleSheet(), False)
+            self.conflicted = False
+        
+        
+    def hint(self):
+        if self.hint_mode:
+            sender = self.sender()
+            cell_name = sender.objectName()
+            
+            cell_parent = sender.parent().objectName()
+            x_factor = int(cell_parent[14:15])
+            y_factor = int(cell_parent[16:17])
+            
+            cell_row, cell_col = map(int, cell_name.split("_")[1:])
+            cell_row , cell_col = cell_row + (3*x_factor), cell_col + (3*y_factor)
+            
+            cell = self.returnCell(cell_col, cell_row)
+
+            if not cell.isReadOnly():
+                cell.setValue(self.solved_board[cell_row][cell_col])
+                cell.setStyleSheet("background-color: white; color: #1962ff;")
+                cell.setReadOnly(True)
+            
+            self.hint_mode = False
+        
+        
     def makeGrid(self):
         central_widget = QGroupBox(self)
         # central_widget.setFixedSize(450, 450)
@@ -201,27 +339,9 @@ class Window(QMainWindow):
                         cell.setObjectName(f"spinBox_{x}_{y}")
                         self.inner_group_box_layout.addWidget(cell, x, y)
                         cell.editingFinished.connect(self.hint)
+                        cell.valueChanged.connect(self.checkConflicting)
                         
                         
-    def hint(self):
-        if self.hint_mode:
-            sender = self.sender()
-            cell_name = sender.objectName()
-            
-            cell_parent = sender.parent().objectName()
-            x_factor = int(cell_parent[14:15])
-            y_factor = int(cell_parent[16:17])
-            
-            cell_row, cell_col = map(int, cell_name.split("_")[1:])
-            cell_row , cell_col = cell_row + (3*x_factor), cell_col + (3*y_factor)
-            
-            cell = self.returnCell(cell_col, cell_row)
-
-            cell.setValue(self.solved_board[cell_row][cell_col])
-            cell.setStyleSheet("background-color: white; color: #1962ff;")
-            cell.setReadOnly(True)
-            
-            self.hint_mode = False
     
     def checkBoard(self):
         currentGrid = [[],[],[],[],[],[],[],[],[]]
