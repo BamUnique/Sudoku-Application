@@ -5,6 +5,7 @@ import sys
 from random import randrange
 from sudoku import Sudoku
 import logging
+from sudokumanager import SudokuBoard
 
 class Window(QMainWindow):
     
@@ -23,7 +24,7 @@ class Window(QMainWindow):
         
         self.setWindowTitle('Sudoku Grid')
         self.setGeometry(100, 100, 450, 450)
-        
+        self.setFixedSize(618, 500)
         puzzle = self.getBoard(given_difficulty, 100)
         solved_puzzle = puzzle.solve()
         
@@ -53,10 +54,6 @@ class Window(QMainWindow):
         self.makeGrid()
         self.setBoard()
         
-        self.reset_button = QPushButton("Reset Board", self)
-        self.reset_button.move(450, 50)
-        self.reset_button.clicked.connect(self.reset_board)
-        
         self.difficulty_label = QLabel("NONE", self)
         self.difficulty_label.setFont(QFont('Arial', 20))
         self.difficulty_label.move(int(550-(self.difficulty_label.width())), 20)
@@ -74,31 +71,28 @@ class Window(QMainWindow):
         self.hint_button.move(500, 140)
         self.hint_button.clicked.connect(lambda :setattr(self, 'hint_mode', True))
         
-        self.testing_button2 = QPushButton("Conflicting Values", self)
-        self.testing_button2.move(500, 160)
-        self.testing_button2.clicked.connect(lambda :setattr(self, 'testing_val', True))
-        
     def setup_board(self, difficulty):
-        self.solved_board = None
+        self.testing_val = False
+        self.reset_board()
+        
         difficulty_num = self.difficulty_list[difficulty]
         seed = randrange(sys.maxsize)
+        self._sudoku = SudokuBoard(difficulty_num, seed)
         
         self.set_difficulty_label(difficulty)
-        board = self.getBoard(difficulty_num, seed)
-        self.applyBoard(board.board)
-        self.solved_board = board.solve().board
+        board = self._sudoku.board
+        solved_board = self._sudoku.solution
+        
+        self.applyBoard(board)
+
         
         self.timer.start()
+        self.testing_val = True
 
     
     def set_difficulty_label(self, difficulty_text):
         self.difficulty_label.setText(difficulty_text)
         
-                
-    def getBoard(self, difficulty, seed):
-        puzzle = Sudoku(3, seed=seed).difficulty(difficulty)
-        return puzzle
-    
     
     def applyBoard(self, board):
         for row_index, current_row in enumerate(board):
@@ -291,9 +285,10 @@ class Window(QMainWindow):
             cell_row , cell_col = cell_row + (3*x_factor), cell_col + (3*y_factor)
             
             cell = self.returnCell(cell_col, cell_row)
-
-            if not cell.isReadOnly():
-                cell.setValue(self.solved_board[cell_row][cell_col])
+            
+            if not self._sudoku.check_if_locked(cell_row, cell_col):
+                self._sudoku.locked[cell_row][cell_col] = 0
+                cell.setValue(self._sudoku.solution[cell_row][cell_col])
                 cell.setStyleSheet("background-color: white; color: #1962ff;")
                 cell.setReadOnly(True)
             
@@ -350,8 +345,6 @@ class Window(QMainWindow):
                 cell = self.returnCell(col, row)
                 if cell is not None:
                     currentGrid[row].append(cell.value())
-        for i in range(9):
-            print(*currentGrid[i])  
         if currentGrid == self.solved_board:
             logging.info("Puzzle is solved")
             self.timer.stop()
