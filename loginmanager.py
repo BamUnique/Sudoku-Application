@@ -19,6 +19,9 @@ class LoginManager:
             password VARCHAR(255) NOT NULL
             )           
         """)
+        print("Initialised.")
+        
+        print(cur.rowcount)
         
         self.conn.commit()
         

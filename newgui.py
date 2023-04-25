@@ -4,12 +4,11 @@ from PyQt6.QtGui import QFont
 import sys
 from random import randrange
 from sudoku import Sudoku
-import logging
 from sudokumanager import SudokuBoard
 
 class Window(QMainWindow):
     
-    difficulty_list = {"Easy": 0.5, "Medium": 0.6, "Hard": 0.7, "Expert": 0.8}
+    difficulty_list = {"Easy": 0.6, "Medium": 0.6, "Hard": 0.7, "Expert": 0.8}
         
     def __init__(self, given_difficulty, loaded_account = None):
         super().__init__()
@@ -25,14 +24,10 @@ class Window(QMainWindow):
         self.setWindowTitle('Sudoku Grid')
         self.setGeometry(100, 100, 450, 450)
         self.setFixedSize(618, 500)
-        puzzle = self.getBoard(given_difficulty, 100)
-        solved_puzzle = puzzle.solve()
-        
-        self.unsolved_board = puzzle.board
-        self.solved_board = solved_puzzle.board
+    
         
         self.difficulty = given_difficulty
-        
+
         self.button = QPushButton('Check Solve', self)
         self.button.clicked.connect(self.checkBoard)
         
@@ -52,7 +47,6 @@ class Window(QMainWindow):
         self.start_time = None
         
         self.makeGrid()
-        self.setBoard()
         
         self.difficulty_label = QLabel("NONE", self)
         self.difficulty_label.setFont(QFont('Arial', 20))
@@ -65,15 +59,19 @@ class Window(QMainWindow):
         
         self.testing_button = QPushButton("Testing", self)
         self.testing_button.move(500, 100)
-        self.testing_button.clicked.connect(lambda: self.setup_board("Expert"))
+        self.testing_button.clicked.connect(lambda: self.setup_board("Easy"))
         
         self.hint_button = QPushButton("Hint", self)
         self.hint_button.move(500, 140)
         self.hint_button.clicked.connect(lambda :setattr(self, 'hint_mode', True))
         
+        self.setup_board("Easy")
+        
     def setup_board(self, difficulty):
         self.testing_val = False
         self.reset_board()
+        print("Here")
+        
         
         difficulty_num = self.difficulty_list[difficulty]
         seed = randrange(sys.maxsize)
@@ -81,9 +79,9 @@ class Window(QMainWindow):
         
         self.set_difficulty_label(difficulty)
         board = self._sudoku.board
-        solved_board = self._sudoku.solution
         
         self.applyBoard(board)
+        print(board)
 
         
         self.timer.start()
@@ -97,9 +95,11 @@ class Window(QMainWindow):
     def applyBoard(self, board):
         for row_index, current_row in enumerate(board):
             for col_index, value in enumerate(current_row):
+
                 
                 if value is not None:
                     cell = self.returnCell(col_index, row_index)
+                    
                     
                     if cell is not None:
                         cell.setValue(value)
@@ -184,7 +184,6 @@ class Window(QMainWindow):
             style_sheet (str): cells style_sheet
             conflicting (bool): True if the cell is a conflicting value, False if not.
         """
-        
         background_color, color = self.splitStyleSheet(style_sheet)
         if color != "#1962ff":
             if conflicting:
@@ -235,6 +234,15 @@ class Window(QMainWindow):
             cell_row, cell_col = cell_row+(3*x_factor), cell_col+(3*y_factor)
             
             cell = self.returnCell(cell_col, cell_row)
+            self._sudoku.set_cell(cell_row, cell_col, cell.value())
+            
+            # Check Row
+            row_check, index_set = self._sudoku.check_row(cell_row, cell_col)
+            if row_check:
+                for pos_in_row in index_set:
+                    self.adjustConflicting(cell=self.returnCell(pos_in_row, cell_row), style_sheet=self.returnCell(pos_in_row, cell_row).styleSheet(), conflicting=True)
+                    self.conflicted = True
+                    error_cell_siblings.append(self.returnCell(pos_in_row, cell_row))
             
             if cell.objectName() in self.error_cell_list:
                 for cell_obj in self.error_cell_list[cell.objectName()]:
@@ -242,26 +250,22 @@ class Window(QMainWindow):
                     
             check_value = cell.value()
             
+            col_check, index_set = self._sudoku.check_col(cell_row, cell_col)
+            if col_check:
+                for pos_in_col in index_set:
+                    self.adjustConflicting(cell = self.returnCell(cell_col, pos_in_col), style_sheet=self.returnCell(cell_col, pos_in_col).styleSheet(), conflicting=True)
+                    self.conflicted = True
+                    error_cell_siblings.append(self.returnCell(cell_col, pos_in_col))
             
-            for row in range(9):
-                if row != cell_row:
-                    cell_sibling = self.returnCell(cell_col, row)
-                    value = cell_sibling.value()
-                    if check_value == value:
-                        self.adjustConflicting(cell, cell.styleSheet(), True)
-                        self.adjustConflicting(cell_sibling, cell_sibling.styleSheet(), True)
-                        self.conflicted = True
-                        error_cell_siblings.append(cell_sibling)
-            
-            for col in range(9):
-                if col != cell_col:
-                    cell_sibling = self.returnCell(col, cell_row)
-                    value = cell_sibling.value()
-                    if check_value == value:
-                        self.adjustConflicting(cell, cell.styleSheet(), True)
-                        self.adjustConflicting(cell_sibling, cell_sibling.styleSheet(), True)
-                        self.conflicted = True
-                        error_cell_siblings.append(cell_sibling)
+            # for col in range(9):
+            #     if col != cell_col:
+            #         cell_sibling = self.returnCell(col, cell_row)
+            #         value = cell_sibling.value()
+            #         if check_value == value:
+            #             self.adjustConflicting(cell, cell.styleSheet(), True)
+            #             self.adjustConflicting(cell_sibling, cell_sibling.styleSheet(), True)
+            #             self.conflicted = True
+            #             error_cell_siblings.append(cell_sibling)
                         
             error_cell_siblings = self.checkCellContainer(cell, error_cell_siblings)
                 
@@ -276,8 +280,8 @@ class Window(QMainWindow):
         if self.hint_mode:
             sender = self.sender()
             cell_name = sender.objectName()
-            
             cell_parent = sender.parent().objectName()
+            
             x_factor = int(cell_parent[14:15])
             y_factor = int(cell_parent[16:17])
             
@@ -339,17 +343,11 @@ class Window(QMainWindow):
                         
     
     def checkBoard(self):
-        currentGrid = [[],[],[],[],[],[],[],[],[]]
-        for row in range(9):
-            for col in range(9):
-                cell = self.returnCell(col, row)
-                if cell is not None:
-                    currentGrid[row].append(cell.value())
-        if currentGrid == self.solved_board:
-            logging.info("Puzzle is solved")
-            self.timer.stop()
+        if self._sudoku.check_if_solved():
+            print("True")
         else:
-            logging.info("Puzzle is not solved")
+            print("False")
+
                 
     def setCell(self, row: int, col: int, value: int):
         
@@ -371,23 +369,12 @@ class Window(QMainWindow):
                     cell.setReadOnly(True)
                     cell.setStyleSheet("background-color: #bab7b6; color: black;")
 
-  
-    def setBoard(self):
-        for i in range(9):
-            for j in range(9):
-                self.setCell(i, j, self.unsolved_board[i][j])
     
     
     
 if __name__ == '__main__':
-    
-    level = logging.DEBUG
-    fmt = '[%(levelname)s] %(asctime)s - %(message)s'
-    logging.basicConfig(level=level, format=fmt)
-    
     app = QApplication(sys.argv)
     sudoku = Window(0.6)
-    sudoku.setCell(3, 1, 5)
     
 
     sudoku.show()

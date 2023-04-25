@@ -1,5 +1,6 @@
 import sudoku
 import numpy as np
+from collections import Counter
 
 class SudokuBoard:
     """
@@ -19,12 +20,50 @@ class SudokuBoard:
     def _initialize_board(self):
         """Initializes the board and board solution as numpy arrays"""
         s = sudoku.Sudoku(3, seed=self.seed).difficulty(self.difficulty)
+        self.validation = s.validate()
         self.starting_board = np.array(s.board)
         self.board = np.array(s.board)
         self.solution = np.array(s.solve().board)
         self.locked = np.array([[None for i in range(10)] for i in range(10)])
         self.lock(self.board)
 
+    
+    def check_row(self, row : int, col : int):
+        seen = []
+        indexes = set()
+        for index, number in enumerate(self.board[row]):
+            if number != None and number != 0:
+                seen.append([index, number])
+        for index in range(len(seen)):
+            for in_num_list in seen:
+                if in_num_list[1] == seen[index][1]:
+                    if in_num_list[0] != seen[index][0]:
+                        indexes.add(in_num_list[0])
+                        indexes.add(seen[index][0])
+        
+        if len(indexes) > 1:
+            return True, indexes
+        
+        return False, None
+    
+    def check_col(self, row: int, col : int):
+        seen = []
+        indexes = set()
+        for i in range(9):
+            if self.board[i][col] != None and self.board[i][col] != 0:
+                seen.append([i, (self.board[i][col])])
+        for index in range(len(seen)):
+            for in_num_list in seen:
+                if in_num_list[1] == seen[index][1]:
+                    if in_num_list[0] != seen[index][0]:
+                        indexes.add(in_num_list[0])
+                        indexes.add(seen[index][0])
+        if len(indexes) > 1:
+            return True, indexes
+        
+        return False, None
+
+                
     
     # def get_cell(self, row : int, col : int, cellwise : bool = False):
     #     """Gets the value of a cell"""
@@ -80,6 +119,12 @@ class SudokuBoard:
                 locked = True
             
             return locked
+        
+
+    def check_if_solved(self, solved : bool = False):
+        if self.board.all() == self.solution.all():
+            solved = True
+        return solved
         
 if __name__ == "__main__":
     sb = SudokuBoard()
