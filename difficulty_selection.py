@@ -2,9 +2,10 @@ from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout,
 import sys
 
 class DifficultySelection(QMainWindow):
-    def __init__(self):
+    def __init__(self, currentPage):
         super().__init__()
         
+        self.currentPage = currentPage
         self.setFixedSize(618, 500)
         
         self.difficulty_dict = {"Easy": 0.5, "Medium": 0.6, "Hard": 0.7, "Expert": 0.8}

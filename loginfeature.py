@@ -5,7 +5,7 @@ import menu
 
 
 class LoginScreen(QMainWindow):
-    def __init__(self, currentPage, menu, newAccountPage):
+    def __init__(self, currentPage):
         super().__init__()
         
         self.error_text = ""
@@ -17,7 +17,6 @@ class LoginScreen(QMainWindow):
         
         self.currentPage = currentPage
         self.menu = menu
-        self.newAccountPage = newAccountPage
         
         self.back_button = QPushButton("Back", self)
         self.back_button.clicked.connect(self.go_back)
@@ -100,7 +99,7 @@ class LoginScreen(QMainWindow):
             
 
 class CreateNewAccount(QMainWindow):
-    def __init__(self, currentPage, menu):
+    def __init__(self, currentPage):
         super().__init__()
         
         self.x_position = 120

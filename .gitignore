@@ -2,6 +2,7 @@
 __pycache__
 
 test.py
+config.py
 
 test_account.json
 leaderboard.json

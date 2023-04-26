@@ -6,13 +6,15 @@ from PyQt6.QtGui import QFont
 import newgui
 import loginfeature
 import difficulty_selection
+from menumanager import MenuManager
 
 
 class SelectionMenu(QMainWindow):
-    def __init__(self):
+    def __init__(self, currentPage):
         super().__init__()
         self.loggedIn = None
-
+        self.currentPage = currentPage
+        self.mm = MenuManager()
         
         self.setWindowTitle('Sudoku Application')
         self.setGeometry(0, 0, 450, 450)
@@ -20,11 +22,17 @@ class SelectionMenu(QMainWindow):
         self.central_layout = QGroupBox(self)
         self.setCentralWidget(self.central_layout)
         
+        # self.setStyleSheet("background-color: white;")
+        
         button_width = 200
         button_height = 40
         button_spot = -10
         
         self.username = "Guest"
+        
+        self.font = QFont()
+        self.font.setFamily("Arial")
+        self.font.setPixelSize(30)
         
         self.x_pos = int((618 - button_width) / 2)
         self.y_pos = int((self.frameGeometry().height() - button_height) / 2)
@@ -53,11 +61,16 @@ class SelectionMenu(QMainWindow):
         
         self.central_layout.setLayout(self.button_grid)
         
-        
+    
+    def updatefunc(self):
+        self.mm.init_pages
+        print("UPDATED")
         
     def playButton(self):
         # print(self.account_information)
-        self.changePage(game_page)
+        # self.changePage(game_page)
+        self.updatefunc()
+        self.mm.change_window("Main Menu")
         # self.changePage(difficulty_page)
         
     def accountButton(self):
@@ -76,10 +89,11 @@ class SelectionMenu(QMainWindow):
       
         
 class TestPage(QMainWindow):
-    def __init__(self):
+    def __init__(self, currentPage):
         super().__init__()
         
         self.buttonGrid = QGridLayout()
+        self.currentPage = currentPage
         
         self.backButton = QPushButton("Back", self)
         self.backButton.clicked.connect(self.back_button)
