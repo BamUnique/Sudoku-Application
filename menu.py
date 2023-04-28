@@ -6,18 +6,30 @@ from PyQt6.QtGui import QFont
 import newgui
 import loginfeature
 import difficulty_selection
-from menumanager import MenuManager
+import settings
 
 
 class SelectionMenu(QMainWindow):
-    def __init__(self, currentPage):
+    
+    pages_dict = {
+        "Main Menu": None,
+        "Settings Menu": None,
+        "Account Menu": None,
+        "Create Account Menu": None,
+        "Difficulty Menu": None,
+        "Game Menu": None
+    }
+    
+    def __init__(self, currentWindow):
         super().__init__()
-        self.loggedIn = None
-        self.currentPage = currentPage
-        self.mm = MenuManager()
         
+        self.loggedIn = None
+        
+        self.currentWindow = currentWindow
+
         self.setWindowTitle('Sudoku Application')
-        self.setGeometry(0, 0, 450, 450)
+        self.setGeometry(0, 0, 618, 500)
+        self.setFixedSize(618, 500)
         
         self.central_layout = QGroupBox(self)
         self.setCentralWidget(self.central_layout)
@@ -58,23 +70,41 @@ class SelectionMenu(QMainWindow):
         self.username_text.adjustSize()
         self.username_text.move((618-self.username_text.width())-10, 10)
         
+        self.settings_button = QPushButton('', self)
+        self.settings_button.clicked.connect(self.settingsButton)
+        self.settings_button.setGeometry(0, 0, 35, 42)
+        
         
         self.central_layout.setLayout(self.button_grid)
         
+        self.init_pages()
+        
     
-    def updatefunc(self):
-        self.mm.init_pages
-        print("UPDATED")
+    def init_pages(self):
+        
+        self.pages_dict["Main Menu"] = self
+        self.pages_dict["Settings Menu"] = settings.SettingsScreen(self.currentWindow, self.pages_dict)
+        self.pages_dict["Account Menu"] = loginfeature.LoginScreen()
+            
+        for key in self.pages_dict:
+            print(key, self.pages_dict[key])
+            if self.pages_dict[key] != None:
+                self.currentWindow.addWidget(self.pages_dict[key])
+        
+        main_menu = self.pages_dict["Main Menu"]
+                
+        self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
+        self.currentWindow.setFixedSize(618, 500)
+        self.currentWindow.show()
         
     def playButton(self):
-        # print(self.account_information)
-        # self.changePage(game_page)
-        self.updatefunc()
-        self.mm.change_window("Main Menu")
-        # self.changePage(difficulty_page)
+        self.changePage("Main Menu")
         
     def accountButton(self):
-        self.changePage(account_page)
+        self.changePage("Account Menu")
+        
+    def settingsButton(self):
+        self.changePage("Settings Menu")
         
     def updateInformation(self):
         print("Updating Information")
@@ -85,15 +115,15 @@ class SelectionMenu(QMainWindow):
         self.username_text.setText(self.username)
       
     def changePage(self, pageToChangeTo):
-        currentPage.setCurrentWidget(pageToChangeTo)
+        print(self.pages_dict[pageToChangeTo])
+        self.currentWindow.setCurrentWidget(self.pages_dict[pageToChangeTo])
       
         
 class TestPage(QMainWindow):
-    def __init__(self, currentPage):
+    def __init__(self):
         super().__init__()
         
         self.buttonGrid = QGridLayout()
-        self.currentPage = currentPage
         
         self.backButton = QPushButton("Back", self)
         self.backButton.clicked.connect(self.back_button)
@@ -111,35 +141,17 @@ class TestPage(QMainWindow):
         self.changePage(account_page)
     
     def changePage(self, pageToChangeTo):
-        currentPage.setCurrentWidget(pageToChangeTo)
+        currentWindow.setCurrentWidget(pageToChangeTo)
           
         
 if __name__ == '__main__':
     
     
     app = QApplication(sys.argv)
-    currentPage = QStackedWidget()
+    currentWindow = QStackedWidget()
     
-    difficulty_page = difficulty_selection.DifficultySelection()
-    currentPage.addWidget(difficulty_page)
+    menu = SelectionMenu(currentWindow)
     
-    game_page = newgui.Window(0.6)
-    currentPage.addWidget(game_page)
-    
-    main_menu = SelectionMenu()
-    currentPage.addWidget(main_menu)
-    
-    test_page = TestPage()
-    currentPage.addWidget(test_page)
-    
-    new_account_page = loginfeature.CreateNewAccount(currentPage, main_menu)
-    currentPage.addWidget(new_account_page)
-    
-    account_page = loginfeature.LoginScreen(currentPage, main_menu, new_account_page)
-    currentPage.addWidget(account_page)
-    
-    currentPage.setCurrentWidget(main_menu)
-    currentPage.show()
-    
+    menu.show()
     
     sys.exit(app.exec())
