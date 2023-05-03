@@ -84,7 +84,7 @@ class SelectionMenu(QMainWindow):
         
         self.pages_dict["Main Menu"] = self
         self.pages_dict["Settings Menu"] = settings.SettingsScreen(self.currentWindow, self.pages_dict)
-        self.pages_dict["Account Menu"] = loginfeature.LoginScreen()
+        self.pages_dict["Account Menu"] = loginfeature.LoginScreen(self.currentWindow)
             
         for key in self.pages_dict:
             print(key, self.pages_dict[key])
@@ -135,10 +135,10 @@ class TestPage(QMainWindow):
         self.buttonGrid.setSpacing(10)
         
     def back_button(self):
-        self.changePage(main_menu)    
+        self.changePage(None)    
         
     def across_button(self):
-        self.changePage(account_page)
+        self.changePage(None)
     
     def changePage(self, pageToChangeTo):
         currentWindow.setCurrentWidget(pageToChangeTo)

@@ -2,6 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QL
 import email_validator
 import json
 import menu
+from loginmanager import DatabaseManager
 
 
 class LoginScreen(QMainWindow):
@@ -9,6 +10,7 @@ class LoginScreen(QMainWindow):
         super().__init__()
         
         self.error_text = ""
+        self.db = DatabaseManager()
         
         self.x_position = 120
         self.y_position = 160
@@ -43,7 +45,7 @@ class LoginScreen(QMainWindow):
         
         self.login_button = QPushButton("Login", self)
         self.login_button.setGeometry(self.x_position+(214), self.y_position+70, 100, 30)
-        self.login_button.clicked.connect(self.matchPassword)
+        self.login_button.clicked.connect(self.attemptLogin)
         
         self.create_account = QLabel("Create account", self)
         self.create_account.move(self.x_position+65, self.y_position+100)
@@ -66,7 +68,28 @@ class LoginScreen(QMainWindow):
     def go_back(self):
         self.currentPage.setCurrentWidget(self.menu)
         
-
+    def attemptLogin(self):
+        self.return_error = False
+        
+        email = self.email_box.text()
+        password = self.password_box.text()
+        invalid_email = self.db.validate_email(email)
+        print(invalid_email)
+        
+        if invalid_email:
+            print("Invalid Email")
+        else:
+            print("Valid Email")
+            exists = self.db.unique_account(email)
+            print(exists)
+            if exists:
+                account_information = self.db.validate_password(email, password)
+                if account_information is not None:
+                    print(account_information)
+                else:
+                    print(account_information, "Should be None")
+                
+    
     def matchPassword(self):
         self.return_error = False
         
