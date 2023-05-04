@@ -74,6 +74,7 @@ class SelectionMenu(QMainWindow):
         self.settings_button.clicked.connect(self.settingsButton)
         self.settings_button.setGeometry(0, 0, 35, 42)
         
+        self.currentWindow.currentChanged.connect(self.updateStuff)
         
         self.central_layout.setLayout(self.button_grid)
         
@@ -84,7 +85,8 @@ class SelectionMenu(QMainWindow):
         
         self.pages_dict["Main Menu"] = self
         self.pages_dict["Settings Menu"] = settings.SettingsScreen(self.currentWindow, self.pages_dict)
-        self.pages_dict["Account Menu"] = loginfeature.LoginScreen(self.currentWindow)
+        self.lf = loginfeature.LoginScreen(self.currentWindow, self.pages_dict)
+        self.pages_dict["Account Menu"] = self.lf
             
         for key in self.pages_dict:
             print(key, self.pages_dict[key])
@@ -106,13 +108,17 @@ class SelectionMenu(QMainWindow):
     def settingsButton(self):
         self.changePage("Settings Menu")
         
-    def updateInformation(self):
+    def updateStuff(self):
         print("Updating Information")
-        self.account_information = loginfeature.LoginScreen.getAccountInformation()
+        self.account_information = self.lf.loaded_account
         print(self.account_information)
-        self.username = self.account_information['username']
-    
-        self.username_text.setText(self.username)
+        if self.account_information is not None:
+            self.username = self.account_information[1]
+            self.id = self.account_information[1]
+        
+            self.username_text.setText(self.username)
+            self.username_text.adjustSize()
+            self.username_text.move((618-self.username_text.width())-10, 10)
       
     def changePage(self, pageToChangeTo):
         print(self.pages_dict[pageToChangeTo])

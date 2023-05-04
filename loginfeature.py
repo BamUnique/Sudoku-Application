@@ -6,11 +6,14 @@ from loginmanager import DatabaseManager
 
 
 class LoginScreen(QMainWindow):
-    def __init__(self, currentPage):
+    def __init__(self, currentPage, pages_dict):
         super().__init__()
         
         self.error_text = ""
         self.db = DatabaseManager()
+        self.loaded_account = None
+        
+        self.pages_dict = pages_dict
         
         self.x_position = 120
         self.y_position = 160
@@ -66,28 +69,35 @@ class LoginScreen(QMainWindow):
             self.password_box.setEchoMode(QLineEdit.EchoMode.Password)
     
     def go_back(self):
-        self.currentPage.setCurrentWidget(self.menu)
+        self.currentPage.setCurrentWidget(self.pages_dict["Main Menu"])
         
     def attemptLogin(self):
-        self.return_error = False
+        throw_error = False
         
         email = self.email_box.text()
         password = self.password_box.text()
         invalid_email = self.db.validate_email(email)
-        print(invalid_email)
         
         if invalid_email:
-            print("Invalid Email")
+            throw_error = True
         else:
-            print("Valid Email")
             exists = self.db.unique_account(email)
-            print(exists)
             if exists:
                 account_information = self.db.validate_password(email, password)
                 if account_information is not None:
-                    print(account_information)
+                    self.loaded_account = account_information
+                    self.currentPage.setCurrentWidget(self.pages_dict["Main Menu"])
                 else:
-                    print(account_information, "Should be None")
+                    throw_error = True
+            else:
+                throw_error = True
+                
+        if throw_error:
+            self.error_message.setText("Incorrect email or password")
+            self.error_message.adjustSize()
+            
+            
+            
                 
     
     def matchPassword(self):

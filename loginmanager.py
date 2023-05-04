@@ -95,7 +95,6 @@ class DatabaseManager:
         password = password.encode('utf-8')
         
         if bcrypt.checkpw(password, securePass):
-            print("Correct Password")
             account_information = [id, username]
         else:
             print("Incorret Password")
@@ -121,7 +120,6 @@ class DatabaseManager:
             existing = False
             if existing_account:
                 existing = True
-            print("EXISTING ?: ", existing)
         except Error as e:
             print(f"Error {e} found.")
         
@@ -198,6 +196,4 @@ if __name__ == "__main__":
     db.connect()
     db.init_database()
     db.display_table()
-    db.unique_account(email="tyranids1234@gmail.com")
-    # db.input_credentials(username="testUsername", email="tyranids1234@gmail.com", password="testPassword")
-    db.validate_password(email="tyranids1234@gmail.com", password="testPassword")
+    
