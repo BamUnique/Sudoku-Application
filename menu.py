@@ -1,5 +1,5 @@
 import sys
-from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout, QGroupBox, QStackedWidget, QLabel
+from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout, QGroupBox, QStackedWidget, QLabel, QFrame
 from PyQt6.QtCore import Qt, QCoreApplication, QRect
 from PyQt6.QtGui import QFont
 
@@ -7,6 +7,7 @@ import newgui
 import loginfeature
 import difficulty_selection
 import settings
+import account
 
 
 class SelectionMenu(QMainWindow):
@@ -15,6 +16,7 @@ class SelectionMenu(QMainWindow):
         "Main Menu": None,
         "Settings Menu": None,
         "Account Menu": None,
+        "Account Window": None,
         "Create Account Menu": None,
         "Difficulty Menu": None,
         "Game Menu": None
@@ -23,7 +25,8 @@ class SelectionMenu(QMainWindow):
     def __init__(self, currentWindow):
         super().__init__()
         
-        self.loggedIn = None
+        self.loggedIn = False
+        self.account_information = None
         
         self.currentWindow = currentWindow
 
@@ -66,13 +69,18 @@ class SelectionMenu(QMainWindow):
         # self.button_grid.addWidget(self.account_button, 1, 1, alignment=Qt.AlignmentFlag.AlignCenter)
         # self.button_grid.addWidget(self.quit_button, 2, 1, alignment=Qt.AlignmentFlag.AlignCenter)
         
-        self.username_text = QLabel(self.username, self)
+        self.username_text = QLabel("", self)
         self.username_text.adjustSize()
         self.username_text.move((618-self.username_text.width())-10, 10)
         
-        self.settings_button = QPushButton('', self)
+        self.username_box = QFrame(self)
+        self.username_box.setFrameShape(QFrame.Shape.Box)
+        self.username_box.setGeometry(578, 10, 30, 30)
+        
+        self.settings_button = QPushButton('⚙', self)
+        self.settings_button.setFont(QFont('Arial', 35))
         self.settings_button.clicked.connect(self.settingsButton)
-        self.settings_button.setGeometry(0, 0, 35, 42)
+        self.settings_button.setGeometry(10, 5, 35, 42)
         
         self.currentWindow.currentChanged.connect(self.updateStuff)
         
@@ -87,6 +95,8 @@ class SelectionMenu(QMainWindow):
         self.pages_dict["Settings Menu"] = settings.SettingsScreen(self.currentWindow, self.pages_dict)
         self.lf = loginfeature.LoginScreen(self.currentWindow, self.pages_dict)
         self.pages_dict["Account Menu"] = self.lf
+        self.acc = account.AccountWindow(self.currentWindow, self.account_information, self.pages_dict)
+        self.pages_dict["Account Window"] = self.acc
             
         for key in self.pages_dict:
             print(key, self.pages_dict[key])
@@ -103,7 +113,10 @@ class SelectionMenu(QMainWindow):
         self.changePage("Main Menu")
         
     def accountButton(self):
-        self.changePage("Account Menu")
+        if self.loggedIn:
+            self.changePage("Account Window")
+        else:   
+            self.changePage("Account Menu")
         
     def settingsButton(self):
         self.changePage("Settings Menu")
@@ -113,12 +126,18 @@ class SelectionMenu(QMainWindow):
         self.account_information = self.lf.loaded_account
         print(self.account_information)
         if self.account_information is not None:
+            self.loggedIn = True
             self.username = self.account_information[1]
-            self.id = self.account_information[1]
+            self.id = self.account_information[0]
+            
+            self.acc.account_information = self.account_information
+            self.acc.logged_in()
         
             self.username_text.setText(self.username)
             self.username_text.adjustSize()
-            self.username_text.move((618-self.username_text.width())-10, 10)
+            self.username_text.move((618-self.username_text.width())-20, 16)
+            
+            self.username_box.setGeometry((588-self.username_text.width()), 10, (20 + self.username_text.width()), 30)
       
     def changePage(self, pageToChangeTo):
         print(self.pages_dict[pageToChangeTo])
