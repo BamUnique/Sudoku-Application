@@ -21,6 +21,15 @@ class DatabaseManager:
             password VARCHAR(255) NOT NULL
             )           
         """)
+        cur.execute("""
+            CREATE TABLE IF NOT EXISTS best_times (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            easy VARCHAR(255) NOT NULL,
+            medium VARCHAR(255) NOT NULL,
+            hard VARCHAR(255) NOT NULL,
+            expert VARCHAR(255) NOT NULL
+            )
+        """)
         try:
             self.conn.commit()
             print("Initialisation successful.")
@@ -47,6 +56,9 @@ class DatabaseManager:
         cur.execute('SELECT id, username, email, password FROM userdata')
         
         print(cur.fetchall())
+        cur.execute("SELECT id, easy, medium, hard, expert FROM best_times")
+        
+        print(cur.fetchall())
         
         self.disconnect()
         
@@ -56,6 +68,7 @@ class DatabaseManager:
         
         cur = self.conn.cursor()
         cur.execute('DELETE FROM userdata WHERE id = ?', id)
+        cur.execute('DELETE FROM best_times WHERE id = ?', id)
         self.conn.commit()
         
         self.disconnect()
@@ -161,7 +174,6 @@ class DatabaseManager:
             invalid_email = True
             
         return invalid_email
-        
     
     def input_credentials(self, username : str, email : str, password : str) -> bool:
         """
@@ -181,12 +193,29 @@ class DatabaseManager:
             self.connect()
             cur = self.conn.cursor()
             cur.execute("INSERT INTO userdata (email, username, password) VALUES (?, ?, ?)", (email, username, hashed_password))
+            cur.execute("INSERT INTO best_times (easy, medium, hard, expert) VALUES (?, ?, ?, ?)", ("00:00", "00:00", "00:00", "00:00"))
             self.conn.commit()
             print("Record inserted successfully into userdata database table", cur.rowcount)
             cur.close()
             self.disconnect()
             print("INSERTED")
             
+            
+    def return_best_times(self, id : str):
+        best_times = self.database_query("SELECT easy, medium, hard, expert FROM best_times WHERE id = ?", str(id))
+        
+        return list(best_times)
+    
+    def update_best_times(self, id, times):
+        self.connect()
+        cur = self.conn.cursor()
+        cur.execute("UPDATE best_times SET easy = ?, medium = ?, hard = ?, expert = ? WHERE id = ?", (times[0], times[1], times[2], times[3], id))
+        self.conn.commit()
+        cur.close()
+        self.disconnect()
+        print("Times Updated")
+        
+
 
 
 
