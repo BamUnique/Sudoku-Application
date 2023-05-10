@@ -65,7 +65,8 @@ class Window(QMainWindow):
         self.hint_button.move(500, 140)
         self.hint_button.clicked.connect(lambda :setattr(self, 'hint_mode', True))
         
-        self.setup_board("Easy")
+        if self.given_difficulty != 0:
+            self.setup_board(self.given_difficulty)
         
     def setup_board(self, difficulty):
         self.testing_val = False

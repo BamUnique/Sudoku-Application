@@ -122,7 +122,7 @@ class SudokuBoard:
         
 
     def check_if_solved(self, solved : bool = False):
-        if self.board.all() == self.solution.all():
+        if np.array_equal(self.board, self.solution):
             solved = True
         return solved
         

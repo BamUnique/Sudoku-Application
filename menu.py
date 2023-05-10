@@ -97,6 +97,10 @@ class SelectionMenu(QMainWindow):
         self.pages_dict["Account Menu"] = self.lf
         self.acc = account.AccountWindow(self.currentWindow, self.account_information, self.pages_dict)
         self.pages_dict["Account Window"] = self.acc
+        self.diff = difficulty_selection.DifficultySelection(self.currentWindow, self.pages_dict, self.account_information)
+        self.pages_dict["Difficulty Menu"] = self.diff
+        self.game = newgui.Window(0, None, self.currentWindow, self.pages_dict)
+        self.pages_dict["Game Menu"] = self.game
             
         for key in self.pages_dict:
             print(key, self.pages_dict[key])
@@ -110,7 +114,7 @@ class SelectionMenu(QMainWindow):
         self.currentWindow.show()
         
     def playButton(self):
-        self.changePage("Main Menu")
+        self.changePage("Difficulty Menu")
         
     def accountButton(self):
         if self.loggedIn:
@@ -138,6 +142,10 @@ class SelectionMenu(QMainWindow):
             self.username_text.move((618-self.username_text.width())-20, 16)
             
             self.username_box.setGeometry((588-self.username_text.width()), 10, (20 + self.username_text.width()), 30)
+            
+            self.diff.show_best_times = True
+            self.diff.account_information = self.account_information
+            self.diff.update()
       
     def changePage(self, pageToChangeTo):
         print(self.pages_dict[pageToChangeTo])
