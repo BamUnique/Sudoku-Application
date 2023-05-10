@@ -2,7 +2,7 @@ from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QL
 import email_validator
 import json
 import menu
-from loginmanager import DatabaseManager
+from databasemanager import DatabaseManager
 
 
 class LoginScreen(QMainWindow):
@@ -86,6 +86,8 @@ class LoginScreen(QMainWindow):
                 account_information = self.db.validate_password(email, password)
                 if account_information is not None:
                     self.loaded_account = account_information
+                    print(self.loaded_account)
+                    self.loaded_account.append(self.db.return_best_times(self.loaded_account[0]))
                     self.currentPage.setCurrentWidget(self.pages_dict["Main Menu"])
                 else:
                     throw_error = True

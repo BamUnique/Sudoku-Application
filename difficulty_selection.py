@@ -2,70 +2,99 @@ from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout,
 from PyQt6.QtGui import QFont, QTextFormat
 from PyQt6.QtCore import Qt
 import sys
+from databasemanager import DatabaseManager
 
 class DifficultySelection(QMainWindow):
-    def __init__(self):
+    def __init__(self, currentWindow, pages_dict, account_information):
         super().__init__()
+        
+        self.show_best_times = False
+        
+        self.currentWindow = currentWindow
+        self.pages_dict = pages_dict
+        self.account_information = account_information
+        if account_information is not None:
+            self.load_times = self.account_information[3]
+            self.show_best_times = True
+            self.easy = self.load_times[0]
+            self.medium = self.load_times[1]
+            self.hard = self.load_times[2]
+            self.expert = self.load_times[3]
+            
+            print(self.easy, self.medium, self.hard, self.expert)
     
         self.setFixedSize(618, 500)
-        self.show_best_times = True
         
         self.difficulty_dict = {"Easy": 0.5, "Medium": 0.6, "Hard": 0.7, "Expert": 0.8}
         
-        button_posX = 109
-        button_posY = 150
+        self.button_posX = 109
+        self.button_posY = 150 
         
         self.easy_button = QPushButton("Easy", self)
-        self.easy_button.setGeometry(button_posX, button_posY, 200, 40)
+        self.easy_button.setGeometry(self.button_posX, self.button_posY, 200, 40)
         self.easy_button.clicked.connect(self.easyDifficulty)
         
         self.medium_button = QPushButton("Medium", self)
-        self.medium_button.setGeometry(button_posX, button_posY+55, 200, 40)
+        self.medium_button.setGeometry(self.button_posX, self.button_posY+55, 200, 40)
         self.medium_button.clicked.connect(self.mediumDifficulty)
         
         self.hard_button = QPushButton("Hard", self)
-        self.hard_button.setGeometry(button_posX, button_posY+110, 200, 40)
+        self.hard_button.setGeometry(self.button_posX, self.button_posY+110, 200, 40)
         self.hard_button.clicked.connect(self.hardDifficulty)
         
         self.expert_button = QPushButton("Expert", self)
-        self.expert_button.setGeometry(button_posX, button_posY+165, 200, 40)
+        self.expert_button.setGeometry(self.button_posX, self.button_posY+165, 200, 40)
         self.expert_button.clicked.connect(self.expertDifficulty)
+        
+        self.choose_difficulty_label = QLabel("         Difficulty         ", self) # 9 Spaces on each side to center the text and add an underline effect.
+        font = QFont()
+        font.setPointSize(25)
+        font.setUnderline(True)
+        self.choose_difficulty_label.setFont(font)
+        self.choose_difficulty_label.adjustSize()
+        self.choose_difficulty_label.move(self.button_posX, self.button_posY-40)
         
         self.locked_box = QFrame(self)
         self.locked_box.setFrameShape(QFrame.Shape.Box)
-        self.locked_box.setGeometry(button_posX + 225, button_posY, 100, 205)
+        self.locked_box.setGeometry(self.button_posX + 225, self.button_posY, 100, 205)
         self.locked_box.setStyleSheet("background-color: rgba(0, 0, 0, 0.5)")
         
         self.locked_text = QLabel("Sign in to access this feature", self)
         self.locked_text.setWordWrap(True)
         self.locked_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.locked_text.setGeometry(button_posX+225, button_posY+75, 100, 50)
+        self.locked_text.setGeometry(self.button_posX+225, self.button_posY+75, 100, 50)
 
         
-        if self.show_best_times:
-            self.easy_best_time = QLabel("00:00", self)
-            self.easy_best_time.move(button_posX+250, button_posY+5)
-            self.easy_best_time.setFont(QFont("Arial", 20))
-            
-            self.medium_best_time = QLabel("00:00", self)
-            self.medium_best_time.move(button_posX+250, button_posY+60)
-            self.medium_best_time.setFont(QFont("Arial", 20))
-            
-            self.hard_best_time = QLabel("00:00", self)
-            self.hard_best_time.move(button_posX+250, button_posY+115)
-            self.hard_best_time.setFont(QFont("Arial", 20))
-            
-            self.expert_best_time = QLabel("00:00", self)
-            self.expert_best_time .move(button_posX+250, button_posY+170)
-            self.expert_best_time.setFont(QFont("Arial", 20))
-            
-            self.locked_box.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
-            self.locked_text.hide()
+        
             
             
         
     def update(self):
-        pass
+        if self.show_best_times:
+            self.load_times = self.account_information[2]
+            self.easy = self.load_times[0]
+            self.medium = self.load_times[1]
+            self.hard = self.load_times[2]
+            self.expert = self.load_times[3]
+            
+            self.easy_best_time = QLabel(self.easy, self)
+            self.easy_best_time.move(self.button_posX+250, self.button_posY+5)
+            self.easy_best_time.setFont(QFont("Arial", 20))
+            
+            self.medium_best_time = QLabel(self.medium, self)
+            self.medium_best_time.move(self.button_posX+250, self.button_posY+60)
+            self.medium_best_time.setFont(QFont("Arial", 20))
+            
+            self.hard_best_time = QLabel(self.hard, self)
+            self.hard_best_time.move(self.button_posX+250, self.button_posY+115)
+            self.hard_best_time.setFont(QFont("Arial", 20))
+            
+            self.expert_best_time = QLabel(self.expert, self)
+            self.expert_best_time .move(self.button_posX+250, self.button_posY+170)
+            self.expert_best_time.setFont(QFont("Arial", 20))
+            
+            self.locked_box.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
+            self.locked_text.hide()
         
     def easyDifficulty(self):
         print(f"Difficulty Easy chosen with a value of {self.difficulty_dict['Easy']}")
@@ -89,7 +118,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     
     
-    window = DifficultySelection()
+    window = DifficultySelection(None, None, None)
     window.show()
     
     sys.exit(app.exec())
