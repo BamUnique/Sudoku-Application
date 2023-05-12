@@ -3,7 +3,7 @@ from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout,
 from PyQt6.QtCore import Qt, QCoreApplication, QRect
 from PyQt6.QtGui import QFont
 
-import newgui
+import sudokuboard
 import loginfeature
 import difficulty_selection
 import settings
@@ -97,10 +97,11 @@ class SelectionMenu(QMainWindow):
         self.pages_dict["Account Menu"] = self.lf
         self.acc = account.AccountWindow(self.currentWindow, self.account_information, self.pages_dict)
         self.pages_dict["Account Window"] = self.acc
-        self.diff = difficulty_selection.DifficultySelection(self.currentWindow, self.pages_dict, self.account_information)
-        self.pages_dict["Difficulty Menu"] = self.diff
-        self.game = newgui.Window(0, None, self.currentWindow, self.pages_dict)
+        self.game = sudokuboard.Window(0, None, self.currentWindow, self.pages_dict)
         self.pages_dict["Game Menu"] = self.game
+        self.pages_dict["Create Account Menu"] = loginfeature.CreateNewAccount(self.currentWindow, self.pages_dict)
+        self.diff = difficulty_selection.DifficultySelection(self.currentWindow, self.pages_dict, self.account_information, self.game)
+        self.pages_dict["Difficulty Menu"] = self.diff
             
         for key in self.pages_dict:
             print(key, self.pages_dict[key])
