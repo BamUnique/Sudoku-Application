@@ -60,7 +60,7 @@ class LoginScreen(QMainWindow):
         self.error_message.setStyleSheet("color: #fa143e;")
         
     def createAccountClicked(self, event):
-        self.currentPage.setCurrentWidget(self.newAccountPage)
+        self.currentPage.setCurrentWidget(self.pages_dict["Create Account Menu"])
     
     def checkIfShowPassword(self):
         if self.show_password_option.isChecked():
@@ -134,14 +134,16 @@ class LoginScreen(QMainWindow):
             
 
 class CreateNewAccount(QMainWindow):
-    def __init__(self, currentPage):
+    def __init__(self, currentWindow, pages_dict):
         super().__init__()
+        
+        self.db = DatabaseManager()
         
         self.x_position = 120
         self.y_position = 160
         
-        self.currentPage = currentPage
-        self.menu = menu
+        self.currentWindow = currentWindow
+        self.pages_dict = pages_dict
         
         self.back_button = QPushButton("Back", self)
         self.back_button.clicked.connect(self.go_back)
@@ -179,7 +181,7 @@ class CreateNewAccount(QMainWindow):
         
         
     def go_back(self):
-        self.currentPage.setCurrentWidget(self.menu)
+        self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
     
     def checkIfShowPassword(self):
         if self.show_password_option.isChecked():
@@ -194,71 +196,18 @@ class CreateNewAccount(QMainWindow):
             self.username_box.setReadOnly(True)
             self.email_box.setReadOnly(True)
         
-        f = open('test_account.json')
-        data = json.load(f)
+        existing = self.db.unique_account(self.email_box.text())
         
-        email = self.email_box.text()
-        
-        emails = [account['email'] for account in data['accounts']]
-        try:
-            index = emails.index(email)
+        if not existing:
+            self.db.input_credentials(self.username_box.text(), self.email_box.text(), self.password_box.text())
+        else:
             self.return_error = True
-            # Return error as email is already in use
-        except ValueError:
-            self.return_error = False
-            
-        if not self.return_error:
-            username = self.username_box.text()
-            usernames = [account['username'] for account in data['accounts']]
-            try:
-                index = usernames.index(username)
-                self.return_error = True
-                # Return Error as username is already taken
-            except ValueError:
-                self.return_error = False
-                
-        if not self.return_error:
-            
-            new_account_data = {
-                "email": self.email_box.text(),
-                "username": self.username_box.text(),
-                "password": self.password_box.text(),
-                "scores": {
-                        "easy"  : "none",
-                        "medium": "none",
-                        "hard"  : "none",
-                        "expert": "none"
-                    }
-            }
-            
-            with open('test_account.json', 'r') as f:
-                data = json.load(f)
-                
-            data['accounts'].append(new_account_data)
-
-            with open('test_account.json', 'w') as f:
-                json.dump(data, f, indent=4)
-                
-            print("Here")
-            self.loadAccountData()
+            print("Email already in use")
     
         if self.return_error:
             self.password_box.setReadOnly(False)
             self.username_box.setReadOnly(False)
             self.email_box.setReadOnly(False)
-            
-    def loadAccountData(self):
-        f = open('test_account.json')
-        data = json.load(f)
-        
-        username = self.username_box.text()
-        
-        usernames = [account['username'] for account in data['accounts']]
-        
-        try:
-            index = usernames.index(username)
-            print(data['accounts'][index])
-            self.account_information = data['accounts'][index]
-        except ValueError:
-            pass
+        else:
+            self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
             
