@@ -3,19 +3,20 @@ from PyQt6.QtCore import Qt, QTimer, QDateTime
 from PyQt6.QtGui import QFont
 import sys
 from random import randrange
-from sudoku import Sudoku
 from sudokumanager import SudokuBoard
 
 class Window(QMainWindow):
     
     difficulty_list = {"Easy": 0.6, "Medium": 0.6, "Hard": 0.7, "Expert": 0.8}
         
-    def __init__(self, given_difficulty, loaded_account = None):
+    def __init__(self, given_difficulty, loaded_account, currentWindow, pages_dict):
         super().__init__()
         
         self.hint_mode = False
         self.testing_val = False
         self.error_cell_list = {}
+        self.currentWindow = currentWindow
+        self.pages_dict = pages_dict
         
         if loaded_account is not None:
             self.account_data = loaded_account
@@ -30,17 +31,35 @@ class Window(QMainWindow):
 
         self.button = QPushButton('Check Solve', self)
         self.button.clicked.connect(self.checkBoard)
+        self.button.move(485, 450)
         
+        self.back_button = QPushButton('⬅', self)
+        self.back_button.setFont(QFont('Arial', 20))
+        self.back_button.setGeometry(10, 5, 35, 42)
+        self.back_button.clicked.connect(self.back)
+        
+        font = QFont("Arial", 20)
+        font.setUnderline(True) # Adds underlines for TIME label
+        self.time_label = QLabel("     Time       ", self)
+        self.time_label.setFont(font)
+        self.time_label.move(485, 56)
+        font.setUnderline(False) # Removes underline for the timer
         self.timer_label = QLabel('00:00', self)
-        self.timer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.timer_label.setFont(QFont('Arial', 20))
+        # self.timer_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.timer_label.setFont(font)
+        self.timer_label.move(515, 80)
         
-        self.buttonGrid = QGridLayout()
-        self.buttonGrid.addWidget(self.button, 0, 0)
-        self.buttonGrid.addWidget(self.timer_label, 0, 1)
-        self.buttonGrid.setSpacing(10)
+        self.personal_best_time = QLabel('00:00', self)
+        self.personal_best_time.setFont(font)
+        self.personal_best_time.move(515, 140)
         
+        font.setUnderline(True)
+        self.best_time_label = QLabel(" Best Time      ", self)
+        self.best_time_label.setFont(font)
+        self.best_time_label.move(485, 116)
+
         #Creates times and runs the function to update every 0.1 seconds as if i run it every second sometimes the timer messes up the time
+        
         self.timer = QTimer()
         self.timer.timeout.connect(self.update)
         self.timer.start(100)
@@ -48,25 +67,26 @@ class Window(QMainWindow):
         
         self.makeGrid()
         
+        font = QFont('Arial', 25)
+        font.setUnderline(True)
+        
         self.difficulty_label = QLabel("NONE", self)
-        self.difficulty_label.setFont(QFont('Arial', 20))
-        self.difficulty_label.move(int(550-(self.difficulty_label.width())), 20)
+        self.difficulty_label.setFont(font)
         self.difficulty_label.adjustSize()
+        self.difficulty_label.move(190, 10)
+        self.difficulty_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
         
-        self.personal_best_time = QLabel("None", self)
-        self.personal_best_time.setFont(QFont('Arial', 18))
-        self.personal_best_time.move(550, 200)
-        
-        self.testing_button = QPushButton("Testing", self)
-        self.testing_button.move(500, 100)
-        self.testing_button.clicked.connect(lambda: self.setup_board("Easy"))
+   
         
         self.hint_button = QPushButton("Hint", self)
-        self.hint_button.move(500, 140)
+        self.hint_button.setGeometry(485, 400, 70, 30)
         self.hint_button.clicked.connect(lambda :setattr(self, 'hint_mode', True))
         
-        if self.given_difficulty != 0:
-            self.setup_board(self.given_difficulty)
+        self.hint_number_button = QPushButton("3", self)
+        self.hint_number_button.setGeometry(560, 400, 25, 30)
+        
+        if self.difficulty != 0:
+            self.setup_board(self.difficulty)
         
     def setup_board(self, difficulty):
         self.testing_val = False
@@ -74,16 +94,15 @@ class Window(QMainWindow):
         print("Here")
         
         
-        difficulty_num = self.difficulty_list[difficulty]
+        difficulty_num = difficulty[0]
         seed = randrange(sys.maxsize)
         self._sudoku = SudokuBoard(difficulty_num, seed)
         
-        self.set_difficulty_label(difficulty)
+        self.set_difficulty_label(difficulty[1])
+
         board = self._sudoku.board
         
         self.applyBoard(board)
-        print(board)
-
         
         self.timer.start()
         self.testing_val = True
@@ -91,7 +110,11 @@ class Window(QMainWindow):
     
     def set_difficulty_label(self, difficulty_text):
         self.difficulty_label.setText(difficulty_text)
+        self.difficulty_label.adjustSize()
         
+        
+    def back(self):
+        self.currentWindow.setCurrentWidget(self.pages_dict["Difficulty Menu"])
     
     def applyBoard(self, board):
         for row_index, current_row in enumerate(board):
@@ -278,7 +301,7 @@ class Window(QMainWindow):
         
         
     def hint(self):
-        if self.hint_mode:
+        if self.hint_mode and self.hint_number_button.text() != "0":
             sender = self.sender()
             cell_name = sender.objectName()
             cell_parent = sender.parent().objectName()
@@ -298,18 +321,21 @@ class Window(QMainWindow):
                 cell.setReadOnly(True)
             
             self.hint_mode = False
+            self.hint_number_button.setText(str(int(self.hint_number_button.text()) - 1))
         
         
     def makeGrid(self):
         central_widget = QGroupBox(self)
+        central_widget.move(0, 46)
         # central_widget.setFixedSize(450, 450)
-        self.setCentralWidget(central_widget)
-        
+        # self.setCentralWidget(central_widget)
         self.cell_size = (45, 45)
+        central_widget.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
         
         self.outer_grid_layout = QGridLayout()
         self.outer_grid_layout.setSpacing(0)
-        self.outer_grid_layout.addLayout(self.buttonGrid, 3, 3, alignment=Qt.AlignmentFlag.AlignBottom)
+        # self.outer_grid_layout.addLayout(self.buttonGrid, 3, 3, alignment=Qt.AlignmentFlag.AlignBottom)
+
         
 
         central_widget.setLayout(self.outer_grid_layout)
@@ -318,6 +344,7 @@ class Window(QMainWindow):
             for j in range(3):
                 inner_group_box = QGroupBox(central_widget)
                 inner_group_box.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Fixed)
+                inner_group_box.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
                 self.inner_group_box_layout = QGridLayout()
                 self.inner_group_box_layout.setSpacing(0)
                 self.inner_group_box_layout.setContentsMargins(0, 0, 0, 0)
@@ -341,11 +368,15 @@ class Window(QMainWindow):
                         cell.editingFinished.connect(self.hint)
                         cell.valueChanged.connect(self.checkConflicting)
                         
+        central_widget.adjustSize()
+                        
                         
     
     def checkBoard(self):
         if self._sudoku.check_if_solved():
             print("True")
+            print(self.timer_label.text())
+            self.timer.stop()
         else:
             print("False")
 
@@ -375,7 +406,7 @@ class Window(QMainWindow):
     
 if __name__ == '__main__':
     app = QApplication(sys.argv)
-    sudoku = Window(0.6)
+    sudoku = Window(0, None, None, None)
     
 
     sudoku.show()
