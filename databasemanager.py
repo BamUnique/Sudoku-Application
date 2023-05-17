@@ -215,6 +215,16 @@ class DatabaseManager:
         self.disconnect()
         print("Times Updated")
         
+    
+    def update_username(self, id, new_username):
+        self.connect()
+        cur = self.conn.cursor()
+        cur.execute("UPDATE userdata SET username = ? WHERE id = ?", (new_username, id))
+        self.conn.commit()
+        cur.close()
+        self.disconnect()
+        print("username changed")
+        
 
 
 
@@ -225,4 +235,5 @@ if __name__ == "__main__":
     db.connect()
     db.init_database()
     db.display_table()
+    
     

@@ -1,5 +1,4 @@
 from sudoku import Sudoku
-import newgui
 import math
 import sys
 import menu
@@ -23,19 +22,6 @@ def chooseDifficulty():
     difficulty_list = [0.5, 0.6, 0.7, 0.8]
     return difficulty_list[chosenDifficulty]
 
-if __name__ == '__main__':
-    
-    # app = menu.QApplication(sys.argv)
-    # main_menu = menu.SelectionMenu()
-    # main_menu.show()
-    
-    chosen_difficulty = chooseDifficulty()
-    
-    app = newgui.QApplication(sys.argv)
-    window = newgui.Window(chosen_difficulty)
-    window.show()
-    
-    sys.exit(app.exec())
 
     
                 
