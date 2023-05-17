@@ -107,8 +107,6 @@ class SelectionMenu(QMainWindow):
             print(key, self.pages_dict[key])
             if self.pages_dict[key] != None:
                 self.currentWindow.addWidget(self.pages_dict[key])
-        
-        main_menu = self.pages_dict["Main Menu"]
                 
         self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
         self.currentWindow.setFixedSize(618, 500)
@@ -127,9 +125,15 @@ class SelectionMenu(QMainWindow):
         self.changePage("Settings Menu")
         
     def updateStuff(self):
+        """_summary_
+        
+        Updates everything that needs to be changes regularily and needs to be checked.\n
+        This function is run whenever the window changes.
+        """
         print("Updating Information")
         self.account_information = self.lf.loaded_account
         print(self.account_information)
+        # Updates everything that needs to be updated when the user is logged in. Refreshes whenever the user changes a screen
         if self.account_information is not None:
             self.loggedIn = True
             self.username = self.account_information[1]
@@ -138,20 +142,53 @@ class SelectionMenu(QMainWindow):
             self.acc.account_information = self.account_information
             self.acc.logged_in()
         
-            self.username_text.setText(self.username)
-            self.username_text.adjustSize()
-            self.username_text.move((618-self.username_text.width())-20, 16)
-            
-            self.username_box.setGeometry((588-self.username_text.width()), 10, (20 + self.username_text.width()), 30)
+            self.update_username_box(self.username)
             
             self.diff.show_best_times = True
             self.diff.account_information = self.account_information
             self.diff.update()
-      
+            
+            # Runs if the user clicks on the logout button in account.py
+            if self.acc.logout is True:
+                self.acc.logout = False
+                self.loggedIn = False
+                self.account_information = None
+                self.username = None
+                self.id = None
+                
+                self.diff.locked_box.setStyleSheet("background-color: rgba(0, 0, 0, 0.5)")
+                self.diff.locked_text.show()
+                self.diff.login = False
+                self.diff.show_best_times = False
+                self.diff.account_information = None
+                self.diff.hide_best_times()
+                
+                self.lf.loaded_account = None
+                
+                self.update_username_box("")
+                
     def changePage(self, pageToChangeTo):
-        print(self.pages_dict[pageToChangeTo])
+        """_summary_
+        
+        Changes the page to whatever the given page is.
+        
+        Args:
+            pageToChangeTo (_type_): str variable e.g. "Main Menu" is a key in the self.pages_dict
+        """
         self.currentWindow.setCurrentWidget(self.pages_dict[pageToChangeTo])
       
+    def update_username_box(self, username):
+        """_summary_
+        
+        Adjusts the sizes of the username, and userame boxe found at the top right of the main menu screen. 
+        """
+        self.username_text.setText(username)
+        self.username_text.adjustSize()
+        self.username_text.move((618-self.username_text.width())-20, 16)
+        if username == "":
+            self.username_box.setGeometry(578, 10, 30, 30)
+        else:
+            self.username_box.setGeometry((588-self.username_text.width()), 10, (20 + self.username_text.width()), 30)
         
 class TestPage(QMainWindow):
     def __init__(self):

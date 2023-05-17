@@ -72,6 +72,24 @@ class DifficultySelection(QMainWindow):
         self.locked_text.setWordWrap(True)
         self.locked_text.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.locked_text.setGeometry(self.button_posX+225, self.button_posY+75, 100, 50)
+        
+        self.easy_best_time = QLabel("00:00", self)
+        self.easy_best_time.move(self.button_posX+250, self.button_posY+5)
+        self.easy_best_time.setFont(QFont("Arial", 20))
+        
+        self.medium_best_time = QLabel("00:00", self)
+        self.medium_best_time.move(self.button_posX+250, self.button_posY+60)
+        self.medium_best_time.setFont(QFont("Arial", 20))
+        
+        self.hard_best_time = QLabel("00:00", self)
+        self.hard_best_time.move(self.button_posX+250, self.button_posY+115)
+        self.hard_best_time.setFont(QFont("Arial", 20))
+        
+        self.expert_best_time = QLabel("00:00", self)
+        self.expert_best_time .move(self.button_posX+250, self.button_posY+170)
+        self.expert_best_time.setFont(QFont("Arial", 20))
+        
+        self.hide_best_times()
 
         
         
@@ -88,27 +106,30 @@ class DifficultySelection(QMainWindow):
             self.hard = self.load_times[2]
             self.expert = self.load_times[3]
             
-            self.easy_best_time = QLabel(self.easy, self)
-            self.easy_best_time.move(self.button_posX+250, self.button_posY+5)
-            self.easy_best_time.setFont(QFont("Arial", 20))
+            self.show_best_times_function()
             
-            self.medium_best_time = QLabel(self.medium, self)
-            self.medium_best_time.move(self.button_posX+250, self.button_posY+60)
-            self.medium_best_time.setFont(QFont("Arial", 20))
-            
-            self.hard_best_time = QLabel(self.hard, self)
-            self.hard_best_time.move(self.button_posX+250, self.button_posY+115)
-            self.hard_best_time.setFont(QFont("Arial", 20))
-            
-            self.expert_best_time = QLabel(self.expert, self)
-            self.expert_best_time .move(self.button_posX+250, self.button_posY+170)
-            self.expert_best_time.setFont(QFont("Arial", 20))
+            self.easy_best_time.setText(self.easy)
+            self.medium_best_time.setText(self.medium)
+            self.hard_best_time.setText(self.hard)
+            self.expert_best_time.setText(self.expert)
             
             self.locked_box.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
             self.locked_text.hide()
             
+    def hide_best_times(self):
+        self.easy_best_time.hide()
+        self.medium_best_time.hide()
+        self.hard_best_time.hide()
+        self.expert_best_time.hide()
+        
+    def show_best_times_function(self):
+        self.easy_best_time.show()
+        self.medium_best_time.show()
+        self.hard_best_time.show()
+        self.expert_best_time.show()
+            
     def choose_difficulty(self, difficulty):
-        self.game.setup_board([self.difficulty_dict[difficulty], difficulty])
+        self.game.setup_board([self.difficulty_dict[difficulty], difficulty, self.difficulty_num[difficulty]])
         if self.login:
             self.game.personal_best_time.setText(self.load_times[self.difficulty_num[difficulty]])
         self.currentWindow.setCurrentWidget(self.pages_dict['Game Menu'])

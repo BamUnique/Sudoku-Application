@@ -18,10 +18,7 @@ class LoginScreen(QMainWindow):
         self.x_position = 120
         self.y_position = 160
         
-        self.central_layout = QGroupBox()
-        
         self.currentPage = currentPage
-        self.menu = menu
         
         self.back_button = QPushButton("Back", self)
         self.back_button.clicked.connect(self.go_back)
@@ -84,9 +81,9 @@ class LoginScreen(QMainWindow):
             exists = self.db.unique_account(email)
             if exists:
                 account_information = self.db.validate_password(email, password)
-                if account_information is not None:
+                if account_information is not None: # Runs if the email entered is valid and login is successful.
+                    self.reset()
                     self.loaded_account = account_information
-                    print(self.loaded_account)
                     self.loaded_account.append(self.db.return_best_times(self.loaded_account[0]))
                     self.currentPage.setCurrentWidget(self.pages_dict["Main Menu"])
                 else:
@@ -98,40 +95,9 @@ class LoginScreen(QMainWindow):
             self.error_message.setText("Incorrect email or password")
             self.error_message.adjustSize()
             
-            
-            
-                
-    
-    def matchPassword(self):
-        self.return_error = False
-        
-        f = open('test_account.json')
-        data = json.load(f)
-        
-        email = self.email_box.text()
-        
-        emails = [account['email'] for account in data['accounts']]
-        try:
-            index = emails.index(email)
-            if self.password_box.text() != data['accounts'][index]['password']:
-                self.return_error = True
-                self.error_text = "Incorrect email or password"
-        except ValueError:
-            self.return_error = True
-            self.error_text = "Incorrect email or password"
-            
-        if not self.return_error:
-            self.loaded_account = (data['accounts'][index])
-            # print(self.loaded_account)
-            self.currentPage.setCurrentWidget(self.menu)
-
-        else:
-            self.error_message.setText(self.error_text)
-            self.error_message.adjustSize()
-            
-    def getAccountInformation(self):
-        pass
-            
+    def reset(self):
+        self.email_box.clear()
+        self.password_box.clear()
 
 class CreateNewAccount(QMainWindow):
     def __init__(self, currentWindow, pages_dict):
@@ -190,6 +156,9 @@ class CreateNewAccount(QMainWindow):
             self.password_box.setEchoMode(QLineEdit.EchoMode.Password)
     
     def checkIfExisting(self):
+        """_summary_\n
+        Runs if the user is creating a new account and have clicked the create account button.
+        """
         self.return_error = False
         if not self.return_error:
             self.password_box.setReadOnly(True)

@@ -91,7 +91,7 @@ class Window(QMainWindow):
     def setup_board(self, difficulty):
         self.testing_val = False
         self.reset_board()
-        print("Here")
+        self.difficulty_index = difficulty[2]
         
         
         difficulty_num = difficulty[0]
@@ -377,6 +377,7 @@ class Window(QMainWindow):
             print("True")
             print(self.timer_label.text())
             self.timer.stop()
+            self.account_data[3][self.difficulty_list[self.difficulty_index]]
         else:
             print("False")
 
