@@ -28,6 +28,7 @@ class LoginScreen(QMainWindow):
         self.email_label.move(self.x_position + 25, self.y_position)
         self.email_box = QLineEdit(self)
         self.email_box.setGeometry(self.x_position+65, self.y_position, 250, 30)
+        self.email_box.setTextMargins(7, 0, 0, 0)
 
         # Generates the stuff for password entering
         self.password_label = QLabel("Password:", self)
@@ -35,6 +36,7 @@ class LoginScreen(QMainWindow):
         self.password_box = QLineEdit(self)
         self.password_box.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_box.setGeometry(self.x_position+65, self.y_position+40, 250, 30)
+        self.password_box.setTextMargins(7, 0, 0, 0)
         
         # Allows the user to see the password that they have entered
         self.show_password_option = QCheckBox(self)
@@ -119,6 +121,8 @@ class CreateNewAccount(QMainWindow):
         self.username_label.move(self.x_position, self.y_position-40)
         self.username_box = QLineEdit(self)
         self.username_box.setGeometry(self.x_position+65, self.y_position-40, 250, 30)
+        self.username_box.setMaxLength(30)
+        self.username_box.setTextMargins(7, 0, 0, 0)
         
         
         # Generates the stuff for email entering
@@ -126,6 +130,7 @@ class CreateNewAccount(QMainWindow):
         self.email_label.move(self.x_position + 25, self.y_position)
         self.email_box = QLineEdit(self)
         self.email_box.setGeometry(self.x_position+65, self.y_position, 250, 30)
+        self.email_box.setTextMargins(7, 0, 0, 0)
 
         # Generates the stuff for password entering
         self.password_label = QLabel("Password:", self)
@@ -133,6 +138,7 @@ class CreateNewAccount(QMainWindow):
         self.password_box = QLineEdit(self)
         self.password_box.setEchoMode(QLineEdit.EchoMode.Password)
         self.password_box.setGeometry(self.x_position+65, self.y_position+40, 250, 30)
+        self.password_box.setTextMargins(7, 0, 0, 0)
         
         # Allows the user to see the password that they have entered
         self.show_password_option = QCheckBox(self)
