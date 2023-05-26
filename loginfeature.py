@@ -110,6 +110,8 @@ class CreateNewAccount(QMainWindow):
         self.x_position = 120
         self.y_position = 160
         
+        self.error_text = ""
+        
         self.currentWindow = currentWindow
         self.pages_dict = pages_dict
         
@@ -151,6 +153,10 @@ class CreateNewAccount(QMainWindow):
         self.create_account_button.setGeometry(self.x_position+(204), self.y_position+70, 110, 30)
         self.create_account_button.clicked.connect(self.checkIfExisting)
         
+        self.error_message = QLabel(self.error_text, self)
+        self.error_message.move(self.x_position+65, self.y_position+150)
+        self.error_message.setStyleSheet("color: #fa143e;")
+        
         
     def go_back(self):
         self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
@@ -174,10 +180,14 @@ class CreateNewAccount(QMainWindow):
         existing = self.db.unique_account(self.email_box.text())
         
         if not existing:
-            self.db.input_credentials(self.username_box.text(), self.email_box.text(), self.password_box.text())
+            print("Inputting Credentials")
+            inputted = self.db.input_credentials(self.username_box.text(), self.email_box.text(), self.password_box.text())
+            if not inputted:
+                self.error_message.setText("Invalid email domain")
+                self.return_error = True
         else:
             self.return_error = True
-            print("Email already in use")
+            self.error_message.setText("Email already in use")
     
         if self.return_error:
             self.password_box.setReadOnly(False)
@@ -186,3 +196,7 @@ class CreateNewAccount(QMainWindow):
         else:
             self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
             
+            
+    def error_message_update(self, message):
+        self.error_message.setText(message)
+        self.error_message.adjustSize()

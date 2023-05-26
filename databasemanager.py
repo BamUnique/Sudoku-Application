@@ -185,7 +185,9 @@ class DatabaseManager:
             password (str): unhashed password to be hashed
         """
         if self.unique_account(email) or self.validate_email(email): # Throws an error back to the user alerting them.
-            print("NOT UNIQUE") 
+            print("Invalid Email Address")
+            inserted = False
+            return inserted
         
         else: # Only runs if the accounts email is not in database.
             hashed_password = self.encrypt_password(password)
@@ -199,6 +201,9 @@ class DatabaseManager:
             cur.close()
             self.disconnect()
             print("INSERTED")
+            inserted = True
+        
+        return inserted
             
             
     def return_best_times(self, id : str):
