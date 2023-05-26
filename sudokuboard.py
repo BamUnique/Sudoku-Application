@@ -1,9 +1,10 @@
-from PyQt6.QtWidgets import QGroupBox, QMainWindow, QApplication, QGridLayout, QSpinBox, QSizePolicy, QPushButton, QLabel
+from PyQt6.QtWidgets import QGroupBox, QMainWindow, QApplication, QGridLayout, QSpinBox, QSizePolicy, QPushButton, QLabel, QDialog, QVBoxLayout, QHBoxLayout
 from PyQt6.QtCore import Qt, QTimer, QDateTime
 from PyQt6.QtGui import QFont
 import sys
 from random import randrange
 from sudokumanager import SudokuBoard
+from databasemanager import DatabaseManager
 
 class Window(QMainWindow):
     
@@ -14,9 +15,14 @@ class Window(QMainWindow):
         
         self.hint_mode = False
         self.testing_val = False
+        self.init_dialog = False
         self.error_cell_list = {}
         self.currentWindow = currentWindow
         self.pages_dict = pages_dict
+        
+        self.db = DatabaseManager()
+        
+        self.account_data = None
         
         if loaded_account is not None:
             self.account_data = loaded_account
@@ -106,6 +112,8 @@ class Window(QMainWindow):
         
         self.timer.start()
         self.testing_val = True
+        
+        self.hint_number_button.setText("3")
 
     
     def set_difficulty_label(self, difficulty_text):
@@ -374,14 +382,97 @@ class Window(QMainWindow):
     
     def checkBoard(self):
         if self._sudoku.check_if_solved():
-            print("True")
-            print(self.timer_label.text())
             self.timer.stop()
-            self.account_data[3][self.difficulty_list[self.difficulty_index]]
+            if self.account_data != None:
+                if self.account_data[2][self.difficulty_index] == '00:00':
+                    self.account_data[2][self.difficulty_index] = self.timer_label.text()
+                else:
+                    current_time = self.convert_time_to_seconds(self.account_data[2][self.difficulty_index])
+                    new_time = self.convert_time_to_seconds(self.timer_label.text())
+                    
+                    if new_time < current_time:
+                        self.account_data[2][self.difficulty_index] = self.timer_label.text()
+                        self.game_completion_popup(True, None)
+                    else:
+                        self.game_completion_popup(False, None)
+            else:
+                self.game_completion_popup(False, False)
         else:
-            print("False")
+            print("Unsolved")
 
-                
+    
+    def convert_time_to_seconds(self, timeToConvert):
+        """_summary_
+
+        Takes a time in the format "00:00" and converts it so time in seconds
+        
+        e.g turns "01:45" into 105
+        """
+
+        index = timeToConvert.find(":")
+        minutes = int(timeToConvert[:index])
+        seconds = int(timeToConvert[-2:])
+        
+        convertedTime = ((minutes * 60) + seconds)
+        
+        return convertedTime
+        
+    
+    def game_completion_popup(self, new_best : bool, ask_login):
+        if self.init_dialog != True:
+            self.init_dialog = True
+            update_score = None
+            self.dialog = QDialog(self)
+            self.dialog.setWindowTitle("Completion")
+            
+            self.dialog.setFixedSize(350, 300)
+            
+            self.main = QHBoxLayout(self.dialog)
+            self.layout_names = QVBoxLayout(self.dialog)
+            self.layout = QVBoxLayout(self.dialog)
+            self.main.addLayout(self.layout_names)
+            self.main.addLayout(self.layout)
+            
+            self.return_button = QPushButton("Return", self.dialog)
+            self.return_button.clicked.connect(lambda: (self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"]), self.dialog.close()))
+            
+            self.play_again_button = QPushButton("Play Again", self.dialog)
+            self.play_again_button.clicked.connect(lambda: (self.currentWindow.setCurrentWidget(self.pages_dict["Difficulty Menu"]), self.dialog.close()))
+            
+            self.layout_names.addWidget(self.return_button)
+            self.layout.addWidget(self.play_again_button)
+            
+            self.congratulations_message = QLabel("Congratulations", self.dialog)
+            self.congratulations_message2 = QLabel("Congratulations",self.dialog)
+            self.layout.addWidget(self.congratulations_message)
+            self.layout_names.addWidget(self.congratulations_message2)
+            
+            self.difficulty_title = QLabel("Difficulty")
+            self.layout_names.addWidget(self.difficulty_title)
+            self.difficulty_message = QLabel(f"{self.difficulty_label.text()}")
+            self.difficulty_message.move(10, 10)
+            self.layout.addWidget(self.difficulty_message)
+            
+            self.time_label = QLabel("Time", self.dialog)
+            self.time_message = QLabel(self.timer_label.text(), self.dialog)
+            self.time_message.move(0, 100)
+            self.layout.addWidget(self.time_message)
+            self.layout_names.addWidget(self.time_label)
+            
+        if self.account_data != None:
+            
+            self.pb = QLabel(self.account_data[2][self.difficulty_index], self.dialog)
+        
+        if ask_login != None:
+            print("LOGIN!")
+        
+        if new_best:
+            self.update_score()
+            
+        
+        self.dialog.exec()
+            
+    
     def setCell(self, row: int, col: int, value: int):
         
         # calculate the position of the inner group box containing the cell
@@ -403,6 +494,10 @@ class Window(QMainWindow):
                     cell.setStyleSheet("background-color: #bab7b6; color: black;")
 
     
+    def update_score(self):
+        self.db.update_best_times(self.account_data[0], self.account_data[2])
+        
+        
     
     
 if __name__ == '__main__':

@@ -148,6 +148,8 @@ class SelectionMenu(QMainWindow):
             self.diff.account_information = self.account_information
             self.diff.update()
             
+            self.game.account_data = self.account_information
+            
             # Runs if the user clicks on the logout button in account.py
             if self.acc.logout is True:
                 self.acc.logout = False
