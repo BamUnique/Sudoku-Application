@@ -212,6 +212,7 @@ class DatabaseManager:
         return list(best_times)
     
     def update_best_times(self, id, times):
+        print(f"Updating user with id {id}'s times to {times}")
         self.connect()
         cur = self.conn.cursor()
         cur.execute("UPDATE best_times SET easy = ?, medium = ?, hard = ?, expert = ? WHERE id = ?", (times[0], times[1], times[2], times[3], id))
@@ -240,5 +241,7 @@ if __name__ == "__main__":
     db.connect()
     db.init_database()
     db.display_table()
+    # db.update_best_times("1", ["03:06", "00:00", "00:00", "00:00"])
+
     
     
