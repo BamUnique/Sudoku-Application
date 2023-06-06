@@ -1,8 +1,10 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QLineEdit, QLabel, QCheckBox, QApplication, QLineEdit
 from PyQt6.QtCore import QPoint, QRect
+from PyQt6.QtGui import QFont
 import email_validator
 import json
 import sys
+import databasemanager
 
 
 
@@ -12,28 +14,37 @@ class AccountWindow(QMainWindow):
         
         self.setFixedSize(618, 500)
         
+        self.db = databasemanager.DatabaseManager()
+        
         self.currentWindow = currentWindow
         self.logout = False
         self.pages_dict = pages_dict
         self.account_information = account_information
         self.best_times = None
         
+        self.back_button = QPushButton('⬅', self)
+        self.back_button.setFont(QFont('Arial', 20))
+        self.back_button.setGeometry(10, 5, 35, 42)
+        self.back_button.clicked.connect(lambda: self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"]))
+        
         self.logout_button = QPushButton("Logout", self)
         self.logout_button.move(10, 450)
         self.logout_button.clicked.connect(self.logout_function)
+        
+        self.logged_in_bool = False
         
 
         
     def logged_in(self):
         
-        if self.account_information is not None:
+        if self.account_information is not None and self.logged_in_bool is False:
+            self.logged_in_bool = True
             self.pos_x = 100
             self.pos_y = 107
             
             self.username_label = QLabel("Username:", self)
             self.username_label.move(self.pos_x, self.pos_y)
             self.username_label.adjustSize()
-            print(self.username_label.size())
             
             self.username_box = QLineEdit(self)
             self.username_box.setMaxLength(30)
@@ -42,8 +53,44 @@ class AccountWindow(QMainWindow):
             self.username_box.setReadOnly(True)
             self.username_box.setGeometry(self.pos_x+75, self.pos_y-7, 250, 30)
             
+            self.password_label = QLabel("Password:", self)
+            self.password_label.move(self.pos_x+3, self.pos_y+33)
+            self.password_label.adjustSize()
+            
+            self.password_box = QLineEdit(self)
+            self.password_box.setText("placeholderpassword")
+            self.password_box.setEchoMode(QLineEdit.EchoMode.Password)
+            self.password_box.setGeometry(self.pos_x+75, self.pos_y+26, 250, 30)
+            self.password_box.setReadOnly(True)
+            
+            self.new_password_label = QLabel("New Password:", self)
+            self.new_password_label.move(self.pos_x-27, self.pos_y+66)
+            self.new_password_label.adjustSize()
+            self.new_password_label.hide()
+            
+            self.new_password_box = QLineEdit(self)
+            self.new_password_box.hide()
+            self.new_password_box.setEchoMode(QLineEdit.EchoMode.Password)
+            self.new_password_box.setGeometry(self.pos_x+75, self.pos_y+59, 250, 30)
+            
+            self.confirm_password_label = QLabel("Confirm Password:", self)
+            self.confirm_password_label.move(self.pos_x-48, self.pos_y+99)
+            self.confirm_password_label.adjustSize()
+            self.confirm_password_label.hide()
+            
+            self.confirm_new_password_box = QLineEdit(self)
+            self.confirm_new_password_box.hide()
+            self.confirm_new_password_box.setEchoMode(QLineEdit.EchoMode.Password)
+            self.confirm_new_password_box.setGeometry(self.pos_x+75, self.pos_y+92, 250, 30)
+            
+            self.change_password = QPushButton("Edit", self)
+            self.change_password.clicked.connect(self.change_password_function)
+            self.change_password.move(self.pos_x+330, self.pos_y+26)
+            
+            
             self.change_username = QPushButton("Edit", self)
             self.change_username.clicked.connect(self.change_username_function)
+            self.change_username.move(self.pos_x+330, self.pos_y-7)
             
             self.best_times = self.account_information[2]
             
@@ -52,17 +99,46 @@ class AccountWindow(QMainWindow):
         self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
         
     def change_username_function(self):
-        print("HERE")
+        """_summary_
+        
+        Allows the user to edit their username.
+        """
         if self.change_username.text() == "Confirm":
             self.change_username.setText("Edit")
             self.username_box.setReadOnly(True)
-            print("Close")
+            if self.username_box.text().isspace() or len(self.username_box.text()) == 0:
+                self.username_box.setText(self.account_information[1])
+            else:
+                self.username_box.setText(self.username_box.text().strip())
+                
+            if self.username_box.text().strip() != self.account_information[1]:
+                self.account_information[1] = self.username_box.text().strip()
+                self.db.update_username(self.account_information[0], self.account_information[1])
+                
+            
+            print(self.account_information)
+            
         else:
             self.change_username.setText("Confirm")
             self.username_box.clear()
             self.username_box.setReadOnly(False)
-            print("Open")
             
+            
+    def change_password_function(self):
+        if self.change_password.text() == "Confirm":
+            pass
+        else:
+            self.change_password.setText("Confirm")
+            self.password_box.clear()
+            self.new_password_box.clear()
+            self.confirm_new_password_box.clear()
+            
+            self.password_box.setReadOnly(False)
+            
+            self.new_password_box.show()
+            self.confirm_new_password_box.show()
+            self.new_password_label.show()
+            self.confirm_password_label.show()
             
 if __name__ == "__main__":
     app = QApplication(sys.argv)
