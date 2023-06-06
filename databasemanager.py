@@ -229,7 +229,7 @@ class DatabaseManager:
         self.conn.commit()
         cur.close()
         self.disconnect()
-        print("username changed")
+        print("Username changed")
         
 
 

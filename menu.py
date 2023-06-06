@@ -104,7 +104,6 @@ class SelectionMenu(QMainWindow):
         self.pages_dict["Difficulty Menu"] = self.diff
             
         for key in self.pages_dict:
-            print(key, self.pages_dict[key])
             if self.pages_dict[key] != None:
                 self.currentWindow.addWidget(self.pages_dict[key])
                 
@@ -130,9 +129,9 @@ class SelectionMenu(QMainWindow):
         Updates everything that needs to be changes regularily and needs to be checked.\n
         This function is run whenever the window changes.
         """
-        print("Updating Information")
+        # print("Updating Information")
         self.account_information = self.lf.loaded_account
-        print(self.account_information)
+
         # Updates everything that needs to be updated when the user is logged in. Refreshes whenever the user changes a screen
         if self.account_information is not None:
             self.loggedIn = True
@@ -149,6 +148,7 @@ class SelectionMenu(QMainWindow):
             self.diff.update()
             
             self.game.account_data = self.account_information
+            self.game.logged_in = True      
             
             # Runs if the user clicks on the logout button in account.py
             if self.acc.logout is True:
@@ -167,7 +167,11 @@ class SelectionMenu(QMainWindow):
                 
                 self.lf.loaded_account = None
                 
+                self.game.account_data = None
+                self.game.logged_in = False  
+                
                 self.update_username_box("")
+                
                 
     def changePage(self, pageToChangeTo):
         """_summary_

@@ -23,7 +23,6 @@ class DifficultySelection(QMainWindow):
             self.hard = self.load_times[2]
             self.expert = self.load_times[3]
             
-            print(self.easy, self.medium, self.hard, self.expert)
     
         self.setFixedSize(618, 500)
         
@@ -116,6 +115,8 @@ class DifficultySelection(QMainWindow):
             self.locked_box.setStyleSheet("background-color: rgba(0, 0, 0, 0)")
             self.locked_text.hide()
             
+            
+            
     def hide_best_times(self):
         self.easy_best_time.hide()
         self.medium_best_time.hide()
@@ -131,7 +132,12 @@ class DifficultySelection(QMainWindow):
     def choose_difficulty(self, difficulty):
         self.game.setup_board([self.difficulty_dict[difficulty], difficulty, self.difficulty_num[difficulty]])
         if self.login:
+            self.game.personal_best_time.show()
+            self.game.best_time_label.show()
             self.game.personal_best_time.setText(self.load_times[self.difficulty_num[difficulty]])
+        else:
+            self.game.personal_best_time.hide()
+            self.game.best_time_label.hide()
         self.currentWindow.setCurrentWidget(self.pages_dict['Game Menu'])
         
 if __name__ == '__main__':

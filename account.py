@@ -52,13 +52,16 @@ class AccountWindow(QMainWindow):
         self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
         
     def change_username_function(self):
+        print("HERE")
         if self.change_username.text() == "Confirm":
             self.change_username.setText("Edit")
             self.username_box.setReadOnly(True)
+            print("Close")
         else:
             self.change_username.setText("Confirm")
             self.username_box.clear()
             self.username_box.setReadOnly(False)
+            print("Open")
             
             
 if __name__ == "__main__":
