@@ -1,4 +1,5 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QLineEdit, QLabel, QCheckBox
+from PyQt6.QtCore import Qt, QTimer, QDateTime
 import email_validator
 import json
 import menu
@@ -58,6 +59,14 @@ class LoginScreen(QMainWindow):
         self.error_message.move(self.x_position+65, self.y_position+150)
         self.error_message.setStyleSheet("color: #fa143e;")
         
+        self.message_timer = QTimer(self)
+        self.message_timer.setInterval(3500)
+        self.message_timer.timeout.connect(self.hide_error_message)
+        
+    def hide_error_message(self):
+        self.error_message.hide()
+        self.message_timer.stop()
+        
     def createAccountClicked(self, event):
         self.currentPage.setCurrentWidget(self.pages_dict["Create Account Menu"])
     
@@ -96,6 +105,7 @@ class LoginScreen(QMainWindow):
         if throw_error:
             self.error_message.setText("Incorrect email or password")
             self.error_message.adjustSize()
+            self.message_timer.start()
             
     def reset(self):
         self.email_box.clear()
@@ -157,6 +167,14 @@ class CreateNewAccount(QMainWindow):
         self.error_message.move(self.x_position+65, self.y_position+150)
         self.error_message.setStyleSheet("color: #fa143e;")
         
+        self.message_timer = QTimer(self)
+        self.message_timer.setInterval(3500)
+        self.message_timer.timeout.connect(self.hide_error_message)
+        
+    def hide_error_message(self):
+        self.error_message.hide()
+        self.message_timer.stop()
+        
         
     def go_back(self):
         self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
@@ -184,15 +202,18 @@ class CreateNewAccount(QMainWindow):
             inputted = self.db.input_credentials(self.username_box.text(), self.email_box.text(), self.password_box.text())
             if not inputted:
                 self.error_message.setText("Invalid email domain")
+                self.error_message.adjustSize()
                 self.return_error = True
         else:
             self.return_error = True
             self.error_message.setText("Email already in use")
+            self.error_message.adjustSize()
     
         if self.return_error:
             self.password_box.setReadOnly(False)
             self.username_box.setReadOnly(False)
             self.email_box.setReadOnly(False)
+            self.message_timer.start()
         else:
             self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"])
             
