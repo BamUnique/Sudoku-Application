@@ -1,5 +1,5 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QLineEdit, QLabel, QCheckBox, QApplication, QLineEdit
-from PyQt6.QtCore import QPoint, QRect
+from PyQt6.QtCore import QPoint, QRect, QTimer
 from PyQt6.QtGui import QFont
 import email_validator
 import json
@@ -46,6 +46,16 @@ class AccountWindow(QMainWindow):
             self.username_label.move(self.pos_x, self.pos_y)
             self.username_label.adjustSize()
             
+            self.timer = QTimer()
+            self.timer.setInterval(1000)
+            self.timer.timeout.connect(self.check_if_matching)
+            
+            self.error_text = QLabel("Passwords do not match", self)
+            self.error_text.setStyleSheet("color: red;")
+            self.error_text.adjustSize()
+            self.error_text.move(self.pos_x+75, self.pos_y + 130)
+            self.error_text.hide()
+            
             self.username_box = QLineEdit(self)
             self.username_box.setMaxLength(30)
             self.username_box.setText(self.account_information[1])
@@ -73,6 +83,8 @@ class AccountWindow(QMainWindow):
             self.new_password_box.setEchoMode(QLineEdit.EchoMode.Password)
             self.new_password_box.setGeometry(self.pos_x+75, self.pos_y+59, 250, 30)
             
+            self.password_box.textEdited.connect(lambda: print(self.password_box.text()))
+            
             self.confirm_password_label = QLabel("Confirm Password:", self)
             self.confirm_password_label.move(self.pos_x-48, self.pos_y+99)
             self.confirm_password_label.adjustSize()
@@ -82,6 +94,8 @@ class AccountWindow(QMainWindow):
             self.confirm_new_password_box.hide()
             self.confirm_new_password_box.setEchoMode(QLineEdit.EchoMode.Password)
             self.confirm_new_password_box.setGeometry(self.pos_x+75, self.pos_y+92, 250, 30)
+            
+            self.confirm_new_password_box.textEdited.connect(lambda: self.timer.start())
             
             self.change_password = QPushButton("Edit", self)
             self.change_password.clicked.connect(self.change_password_function)
@@ -139,6 +153,17 @@ class AccountWindow(QMainWindow):
             self.confirm_new_password_box.show()
             self.new_password_label.show()
             self.confirm_password_label.show()
+            
+
+            
+    def check_if_matching(self):
+        if self.new_password_box.text() != self.confirm_new_password_box.text():
+            print("Password is not matching")
+            self.error_text.show()
+        else:
+            self.error_text.hide()
+        
+        
             
 if __name__ == "__main__":
     app = QApplication(sys.argv)

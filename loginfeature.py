@@ -201,7 +201,7 @@ class CreateNewAccount(QMainWindow):
             print("Inputting Credentials")
             inputted = self.db.input_credentials(self.username_box.text(), self.email_box.text(), self.password_box.text())
             if not inputted:
-                self.error_message.setText("Invalid email domain")
+                self.error_message.setText("Invalid email address")
                 self.error_message.adjustSize()
                 self.return_error = True
         else:
