@@ -19,4 +19,5 @@ class SettingsScreen(QMainWindow):
         self.back_button.setFont(QFont('Arial', 20))
         self.back_button.setGeometry(10, 5, 35, 42)
         self.back_button.clicked.connect(lambda: self.currentWindow.setCurrentWidget(self.pages_dict["Main Menu"]))
+        self.setStyleSheet("background-color: white;")
         
