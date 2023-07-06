@@ -93,6 +93,30 @@ class DatabaseManager:
         
         return (rdata)
     
+    def check_password(self, id : str, password : str) -> bool:
+        """
+        Checks is the password is matching for the ID given. Used for changing password in the account.py file.
+        """
+        rdata = self.database_query("SELECT id, password FROM userdata WHERE id = ?", (id, ))
+        unused, securePass = rdata
+        password = password.encode('utf-8')
+        
+        if bcrypt.checkpw(password, securePass):
+            return True
+        return False
+    
+    def update_password(self, id : str, password : str):
+        
+        securePass = self.encrypt_password(password)
+        
+        self.connect()
+        cur = self.conn.cursor()
+        cur.execute("UPDATE userdata SET password = ? WHERE id = ?", (securePass, id))
+        self.conn.commit()
+        cur.close()
+        self.disconnect()
+
+    
     def validate_password(self, email : str, password : str) -> bool:
         """
         Check that the email and password matches in the db.

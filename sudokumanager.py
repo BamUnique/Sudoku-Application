@@ -62,25 +62,6 @@ class SudokuBoard:
             return True, indexes
         
         return False, None
-
-                
-    
-    # def get_cell(self, row : int, col : int, cellwise : bool = False):
-    #     """Gets the value of a cell"""
-    #     if cellwise:
-    #         sx = (row % 3) * 3
-    #         sy = (col % 3) * 3
-            
-    #         cx = col % 3
-    #         cy = col // 3
-            
-    #         cell_value = self.board[sy + cy][sx + cx]
-            
-    #         return cell_value
-        
-    #     else:
-    #         return self.board[row][col]
-    
         
     def set_cell(self, row : int, col : int, value : int | None, cellwise : bool = False):
         """Sets the value of a cell"""

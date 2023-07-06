@@ -128,9 +128,6 @@ class AccountWindow(QMainWindow):
             if self.username_box.text().strip() != self.account_information[1]:
                 self.account_information[1] = self.username_box.text().strip()
                 self.db.update_username(self.account_information[0], self.account_information[1])
-                
-            
-            print(self.account_information)
             
         else:
             self.change_username.setText("Confirm")
@@ -140,7 +137,21 @@ class AccountWindow(QMainWindow):
             
     def change_password_function(self):
         if self.change_password.text() == "Confirm":
-            pass
+            response = self.db.check_password(self.account_information[0], self.password_box.text())
+            if response:
+                self.db.update_password(self.account_information[0], self.new_password_box.text())
+                self.change_password.setText("Edit")
+                self.password_box.setText("placeholderpassword")
+                self.password_box.setReadOnly(True)
+                
+                self.new_password_box.hide()
+                self.confirm_new_password_box.hide()
+                self.new_password_label.hide()
+                self.confirm_password_label.hide()
+            else:
+                self.error_text.show()
+                self.error_text.setText("Incorrect Password")
+                
         else:
             self.change_password.setText("Confirm")
             self.password_box.clear()
@@ -158,7 +169,7 @@ class AccountWindow(QMainWindow):
             
     def check_if_matching(self):
         if self.new_password_box.text() != self.confirm_new_password_box.text():
-            print("Password is not matching")
+            self.error_text.setText("Password is not matching")
             self.error_text.show()
         else:
             self.error_text.hide()
