@@ -3,6 +3,9 @@ from PyQt6.QtWidgets import QMainWindow, QPushButton, QApplication, QGridLayout,
 from PyQt6.QtCore import Qt, QCoreApplication, QRect
 from PyQt6.QtGui import QFont
 
+import webbrowser
+
+#Imports from other files in the program.
 import sudokuboard
 import loginfeature
 import difficulty_selection
@@ -81,6 +84,11 @@ class SelectionMenu(QMainWindow):
         self.settings_button.setFont(QFont('Arial', 35))
         self.settings_button.clicked.connect(self.settingsButton)
         self.settings_button.setGeometry(10, 5, 35, 42)
+        
+        self.help_button = QPushButton('?', self)
+        self.help_button.setFont(QFont('Arial', 35))
+        self.help_button.clicked.connect(lambda: webbrowser.open("https://stackoverflow.com/questions/34198904/how-can-i-open-an-url-using-pyqt-when-clicking-on-a-button"))
+        self.help_button.setGeometry(10, 453, 35, 42)
         
         self.currentWindow.currentChanged.connect(self.updateStuff)
         

@@ -1,8 +1,6 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QLineEdit, QLabel, QCheckBox, QApplication, QLineEdit
 from PyQt6.QtCore import QPoint, QRect, QTimer
 from PyQt6.QtGui import QFont
-import email_validator
-import json
 import sys
 import databasemanager
 
