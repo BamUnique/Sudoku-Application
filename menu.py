@@ -55,6 +55,16 @@ class SelectionMenu(QMainWindow):
         self.x_pos = int((618 - button_width) / 2)
         self.y_pos = int((self.frameGeometry().height() - button_height) / 2)
         
+        
+        title_font = QFont()
+        title_font.setFamily("Arial")
+        title_font.setPixelSize(75)
+        self.title = QLabel("Sudoku BK", self)
+        self.title.setFont(title_font)
+        self.title.adjustSize()
+        self.title.move(121, 110)
+        
+        
         self.play_button = QPushButton('Play', self)
         self.play_button.clicked.connect(self.playButton)
         self.play_button.setGeometry(QRect(self.x_pos, self.y_pos-(button_spot), button_width, button_height))
@@ -87,7 +97,7 @@ class SelectionMenu(QMainWindow):
         
         self.help_button = QPushButton('?', self)
         self.help_button.setFont(QFont('Arial', 35))
-        self.help_button.clicked.connect(lambda: webbrowser.open("https://stackoverflow.com/questions/34198904/how-can-i-open-an-url-using-pyqt-when-clicking-on-a-button"))
+        self.help_button.clicked.connect(lambda: webbrowser.open("https://youtu.be/1gRvBBULcrQ"))
         self.help_button.setGeometry(10, 453, 35, 42)
         
         self.currentWindow.currentChanged.connect(self.updateStuff)

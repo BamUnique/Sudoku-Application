@@ -1,7 +1,6 @@
 from PyQt6.QtWidgets import QMainWindow, QPushButton, QGridLayout, QGroupBox, QLineEdit, QLabel, QCheckBox
 from PyQt6.QtCore import Qt, QTimer, QDateTime
 import email_validator
-import json
 import menu
 from databasemanager import DatabaseManager
 
